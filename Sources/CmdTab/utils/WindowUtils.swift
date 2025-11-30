@@ -1,6 +1,4 @@
 import AppKit
-import Cocoa
-import CoreGraphics
 
 let UNKNOWN_APP = "(Unknown App)"
 let NO_TITLE = "(no title)"

@@ -1,15 +1,6 @@
 import Cocoa
 
-// Check for accessibility permissions and prompt if needed
-func checkAccessibilityPermissions() -> Bool {
-  // Use string literal to avoid concurrency safety issues
-  let options: [String: Any] = [
-    "AXTrustedCheckOptionPrompt": true
-  ]
-
-  return AXIsProcessTrustedWithOptions(options as CFDictionary)
-}
-
+// TEST: test only
 func printSwitchableWindows() {
   print("Switchable Windows")
   print("============")
@@ -20,12 +11,20 @@ func printSwitchableWindows() {
   }
 }
 
+@MainActor
 func main() {
   guard checkAccessibilityPermissions() else {
     print("Need accessibility")
     return
   }
+
   printSwitchableWindows()
+
+  let app = NSApplication.shared
+  let delegate = AppDelegate()
+  app.delegate = delegate
+  app.setActivationPolicy(.regular)
+  app.run()
 }
 
 main()
