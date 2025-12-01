@@ -1,27 +1,20 @@
 import Cocoa
 
-// TEST: test only
-func printSwitchableWindows() {
-  print("Switchable Windows")
-  print("============")
-  let switchableApps = listSwitchableWindows()
-  for app in switchableApps {
-    print(app)
-    print("============")
-  }
-}
-
 @MainActor
 func main() {
+  // Check accessibility permissions first
   guard checkAccessibilityPermissions() else {
-    print("Need accessibility")
+    print(
+      "Accessibility permissions required. Please grant permissions in System Preferences > Security & Privacy > Privacy > Accessibility and run the app again."
+    )
     return
   }
 
-  printSwitchableWindows()
-
+  // Setup application
   let app = NSApplication.shared
   let delegate = AppDelegate()
+
+  // Configure and run the application
   app.delegate = delegate
   app.setActivationPolicy(.regular)
   app.run()

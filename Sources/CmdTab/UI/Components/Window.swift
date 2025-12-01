@@ -1,6 +1,6 @@
 import Cocoa
 
-class MainWindow: NSWindow {
+class Window: NSWindow {
   override var canBecomeKey: Bool { true }
   override var canBecomeMain: Bool { true }
 }

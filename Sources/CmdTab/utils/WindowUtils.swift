@@ -7,6 +7,8 @@ struct SwitchableWindow {
   let appName: String
   let pid: pid_t
   let windowTitle: String
+  let icon: NSImage?
+  let activateFn: () -> Void
 }
 
 func listRunningApplications() -> [NSRunningApplication] {
@@ -20,16 +22,22 @@ func listSwitchableWindows() -> [SwitchableWindow] {
   let apps = listRunningApplications()
 
   for app in apps {
-    // 1. 优先取 FocusedWindow
+    // 1. use AXWindows
+    if let wins = app.tryIntoAXWindows(), !wins.isEmpty {
+      for win in wins {
+        result.append(win)
+      }
+      continue
+    }
+
+    // 2. fallback to FocusedWindow
     if let w = app.tryIntoAXFocusedWindow() {
       result.append(w)
       continue
     }
 
-    // 2. fallback 到 AXWindows
-    for win in app.tryIntoAXWindows() {
-      result.append(win)
-    }
+    let sw = app.intoSwitchableWindow(NO_TITLE, win: nil)
+    result.append(sw)
   }
 
   return result
@@ -55,11 +63,14 @@ extension NSRunningApplication {
     // AXFocusedWindow is AXUIElement
     let win = focusedValue as! AXUIElement
 
-    return self.intoSwitchableWindow(getWindowTitle(win))
+    return self.intoSwitchableWindow(getWindowTitle(win), win: win)
   }
 
-  func tryIntoAXWindows() -> [SwitchableWindow] {
+  func tryIntoAXWindows() -> [SwitchableWindow]? {
     let axUI = self.getAxUIElem()
+    if self.getAppUnlocalizedName() == "Arc" {
+      print("ARC here!!")
+    }
 
     var res: [SwitchableWindow] = []
 
@@ -71,22 +82,54 @@ extension NSRunningApplication {
     )
 
     // AXWindows is [AXUIElement]
-    let windows = windowsValue as? [AXUIElement] ?? []
+    guard let windows = windowsValue as? [AXUIElement] else { return nil }
 
     for win in windows {
+      guard filterAXWindowsByAttrs(win: win) else { continue }
       let title = getWindowTitle(win)
-      res.append(self.intoSwitchableWindow(title))
+      res.append(self.intoSwitchableWindow(title, win: win))
     }
 
     return res
   }
 
-  private func intoSwitchableWindow(_ title: String) -> SwitchableWindow {
+  func filterAXWindowsByAttrs(win: AXUIElement) -> Bool {
+    var hidden: AnyObject?
+    AXUIElementCopyAttributeValue(
+      win,
+      kAXHiddenAttribute as CFString,
+      &hidden
+    )
+    print(self.getAppUnlocalizedName() ?? self.localizedName ?? "UNKNOWN_APP", hidden as Any)
+    if let h = hidden as? Int, h == 0 {
+      return false
+    }
+    return true
+  }
+
+  func intoSwitchableWindow(_ title: String, win: AXUIElement?) -> SwitchableWindow {
     return
       SwitchableWindow(
         appName: self.getAppUnlocalizedName() ?? self.localizedName ?? UNKNOWN_APP,
         pid: self.processIdentifier,
-        windowTitle: title
+        windowTitle: title,
+        icon: self.icon,
+        activateFn: {
+          // has window, activate it
+          if let windowElement = win {
+            AXUIElementPerformAction(windowElement, kAXRaiseAction as CFString)
+            self.activate()
+            return
+          }
+
+          // no window, launch it
+          NSWorkspace.shared.launchApplication(
+            withBundleIdentifier: self.bundleIdentifier ?? "",
+            options: [.default],
+            additionalEventParamDescriptor: nil,
+            launchIdentifier: nil
+          )
+        }
       )
   }
 

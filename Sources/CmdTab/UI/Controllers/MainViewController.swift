@@ -1,0 +1,111 @@
+import Cocoa
+
+@MainActor
+class MainViewController: DataManagerDelegate, SearchControllerDelegate {
+  private let dataManager: DataManager
+  private let windowManager: WindowManager
+  private let tableViewController: TableViewController
+  private let searchController: SearchController
+
+  private var searchField: NSSearchField!
+  private var tableView: VimTableView!
+
+  init() {
+    self.dataManager = DataManager()
+    self.windowManager = WindowManager()
+    self.tableViewController = TableViewController(dataManager: dataManager)
+    self.searchController = SearchController(
+      dataManager: dataManager,
+      tableViewController: tableViewController,
+    )
+
+    // Set up delegation
+    self.dataManager.delegate = self
+    self.searchController.delegate = self
+  }
+
+  func setupMainWindow() -> Window {
+    let window = windowManager.createMainWindow()
+
+    guard let contentView = window.contentView else {
+      fatalError("Window content view is nil")
+    }
+
+    setupUI(in: contentView)
+
+    return window
+  }
+
+  func showWindow() {
+    windowManager.showWindow()
+    searchController.focusSearchField()
+  }
+
+  func didRequestClose() {
+    windowManager.hideWindow()
+  }
+
+  func didRequestSwitch() {
+    tableViewController.activateSelected()
+    didRequestClose()
+  }
+
+  func addSwitchableWindows(_ windows: [SwitchableWindow]) {
+    dataManager.addWindows(windows)
+  }
+
+  // MARK: - DataManagerDelegate
+
+  func dataManagerDidUpdateData(_ dataManager: DataManager) {
+    tableViewController.reloadData()
+  }
+
+  // MARK: - Private Methods
+
+  private func setupUI(in view: NSView) {
+    createSearchField(in: view)
+    createTableView(in: view)
+    setupConstraints(in: view)
+
+    // Setup controllers
+    searchController.setupSearchField(searchField, tableView: tableView)
+    tableViewController.setupTableView(tableView)
+  }
+
+  private func createSearchField(in view: NSView) {
+    searchField = NSSearchField()
+    searchField.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(searchField)
+  }
+
+  private func createTableView(in view: NSView) {
+    let scrollView = NSScrollView()
+    scrollView.translatesAutoresizingMaskIntoConstraints = false
+    scrollView.drawsBackground = false
+    scrollView.hasVerticalScroller = true
+    scrollView.automaticallyAdjustsContentInsets = false
+    scrollView.contentInsets = NSEdgeInsetsZero
+
+    tableView = VimTableView()
+    scrollView.documentView = tableView
+    view.addSubview(scrollView)
+  }
+
+  private func setupConstraints(in view: NSView) {
+    guard let scrollView = tableView.enclosingScrollView else { return }
+
+    NSLayoutConstraint.activate([
+      // Search field constraints
+      searchField.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
+      searchField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+      searchField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+      searchField.heightAnchor.constraint(equalToConstant: 30),
+
+      // ScrollView constraints
+      scrollView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 10),
+      scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+      scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+      scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
+    ])
+  }
+}
