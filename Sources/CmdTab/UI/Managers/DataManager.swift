@@ -65,10 +65,6 @@ class DataManager {
       .max() ?? 80
   }
 
-  func addWindows(_ windows: [SwitchableWindow]) {
-    switchableWindows.append(contentsOf: windows)
-  }
-
   // notify the main window to refresh
   private func notifyDelegate() {
     delegate?.dataManagerDidUpdateData(self)

@@ -2,7 +2,7 @@ import Cocoa
 
 @MainActor
 protocol SearchControllerDelegate: AnyObject {
-  func didRequestClose()
+  func didRequestNormalMode()
   func didRequestSwitch()
 }
 
@@ -24,6 +24,12 @@ class SearchController: NSObject, NSSearchFieldDelegate {
     self.searchField = searchField
     self.tableView = tableView
     searchField.delegate = self
+  }
+
+  func clearSearch() {
+    searchField?.stringValue = ""
+    dataManager.updateSearchQuery("")
+    tableViewController.reloadData()
   }
 
   // MARK: - NSSearchFieldDelegate
@@ -66,26 +72,10 @@ class SearchController: NSObject, NSSearchFieldDelegate {
   // MARK: - Private Methods
 
   private func handleEnterKey() {
-    // TODO: Implement window switching logic
-    // This would typically switch to the selected window
-    print("Enter key pressed - should switch to selected window")
     delegate?.didRequestSwitch()
   }
 
   private func handleEscapeKey() {
-    // TODO: Implement window closing logic
-    // This would typically close the CmdTab window
-    print("Escape key pressed - should close window")
-    delegate?.didRequestClose()
-  }
-
-  func focusSearchField() {
-    searchField?.becomeFirstResponder()
-  }
-
-  func clearSearch() {
-    searchField?.stringValue = ""
-    dataManager.updateSearchQuery("")
-    tableViewController.reloadData()
+    delegate?.didRequestNormalMode()
   }
 }

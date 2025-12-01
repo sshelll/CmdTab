@@ -5,18 +5,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   private var mainViewController: MainViewController?
   private var statusController: StatusController!
   private var window: Window?
-  private var pendingWindows: [SwitchableWindow] = []
 
-  // INFO: override funcs
+  // MARK: -- NSApplicationDelegate
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     setupApplication()
-
-    // Add any pending windows
-    if !pendingWindows.isEmpty {
-      mainViewController?.addSwitchableWindows(pendingWindows)
-      pendingWindows.removeAll()
-    }
+    setupGlobalHotkey()
+    NSApplication.shared.setActivationPolicy(.accessory)
   }
 
   func applicationWillTerminate(_ notification: Notification) {
@@ -27,29 +22,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
     return false
   }
 
+  // MARK: -- StatusControllerDelegate + Hotkey
+
   func didRequestShowMainWindow() {
-    print("AppDelegate: didRequestShowMainWindow() called - showing main window")
     NSApp.activate(ignoringOtherApps: true)
     mainViewController?.showWindow()
   }
 
   func didRequestQuit() {
-    print("AppDelegate: didRequestQuit() called - terminating app")
     NSApp.terminate(nil)
   }
 
-  // INFO: public funcs
-
-  func addSwitchableWindows(_ windows: [SwitchableWindow]) {
-    if let mainViewController = mainViewController {
-      mainViewController.addSwitchableWindows(windows)
-    } else {
-      // Store windows to add them later when the app finishes launching
-      pendingWindows.append(contentsOf: windows)
-    }
-  }
-
-  // INFO: private funcs
+  // MARK: -- private funcs
 
   private func setupApplication() {
     // status bar
@@ -59,6 +43,35 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
     // main win
     mainViewController = MainViewController()
     window = mainViewController?.setupMainWindow()
-    mainViewController?.showWindow()
+    // mainViewController?.showWindow()
+  }
+
+  private func setupGlobalHotkey() {
+    let eventMask = (1 << CGEventType.keyDown.rawValue)
+    let eventTap = CGEvent.tapCreate(
+      tap: .cgSessionEventTap,
+      place: .headInsertEventTap,
+      options: .defaultTap,
+      eventsOfInterest: CGEventMask(eventMask),
+      callback: { proxy, type, event, refcon in
+        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+        let flags = event.flags
+        if keyCode == 48 && flags.contains(.maskCommand) {
+          DispatchQueue.main.async {
+            if let appDelegate = NSApp.delegate as? AppDelegate {
+              appDelegate.didRequestShowMainWindow()
+            }
+          }
+          return nil  // prevent sending to sys
+          // return Unmanaged.passUnretained(event)  // still pass to sys
+        }
+        return Unmanaged.passUnretained(event)
+      },
+      userInfo: nil
+    )
+
+    let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+    CGEvent.tapEnable(tap: eventTap!, enable: true)
   }
 }

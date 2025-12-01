@@ -1,6 +1,16 @@
 import Cocoa
 
+@MainActor
+protocol VimTableViewDelegate: AnyObject {
+  func handleEnterKey()
+  func handleEscapeKey()
+  func handleSlashKey()
+}
+
+@MainActor
 class VimTableView: NSTableView {
+  weak var controllerDelegate: VimTableViewDelegate?
+
   override func keyDown(with event: NSEvent) {
     guard let chars = event.charactersIgnoringModifiers else {
       super.keyDown(with: event)
@@ -12,6 +22,15 @@ class VimTableView: NSTableView {
       moveSelection(down: true)
     case "k", "h":
       moveSelection(down: false)
+    case "\r":  // Enter key
+      if selectedRow >= 0 {
+        // Notify delegate or perform action for selected row
+        controllerDelegate?.handleEnterKey()
+      }
+    case "\u{1b}":  // Escape key
+      controllerDelegate?.handleEscapeKey()
+    case "/":
+      controllerDelegate?.handleSlashKey()
     default:
       switch event.keyCode {
       case 125, 124:  // down + right arrow

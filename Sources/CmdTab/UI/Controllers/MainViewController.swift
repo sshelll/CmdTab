@@ -1,9 +1,14 @@
 import Cocoa
 
 @MainActor
-class MainViewController: DataManagerDelegate, SearchControllerDelegate {
+class MainViewController:
+  DataManagerDelegate,
+  SearchControllerDelegate,
+  TableViewControllerDelegate
+{
   private let dataManager: DataManager
   private let windowManager: WindowManager
+
   private let tableViewController: TableViewController
   private let searchController: SearchController
 
@@ -22,6 +27,7 @@ class MainViewController: DataManagerDelegate, SearchControllerDelegate {
     // Set up delegation
     self.dataManager.delegate = self
     self.searchController.delegate = self
+    self.tableViewController.delegate = self
   }
 
   func setupMainWindow() -> Window {
@@ -37,9 +43,13 @@ class MainViewController: DataManagerDelegate, SearchControllerDelegate {
   }
 
   func showWindow() {
+    dataManager.loadSwitchableWindows()
+    searchController.clearSearch()
     windowManager.showWindow()
-    searchController.focusSearchField()
+    windowManager.getWindow()?.makeFirstResponder(tableView)
   }
+
+  // MARK: - SearchControllerDelegate + TableViewControllerDelegate
 
   func didRequestClose() {
     windowManager.hideWindow()
@@ -50,8 +60,12 @@ class MainViewController: DataManagerDelegate, SearchControllerDelegate {
     didRequestClose()
   }
 
-  func addSwitchableWindows(_ windows: [SwitchableWindow]) {
-    dataManager.addWindows(windows)
+  func didRequestSearchMode() {
+    windowManager.getWindow()?.makeFirstResponder(searchField)
+  }
+
+  func didRequestNormalMode() {
+    windowManager.getWindow()?.makeFirstResponder(tableView)
   }
 
   // MARK: - DataManagerDelegate
@@ -64,10 +78,10 @@ class MainViewController: DataManagerDelegate, SearchControllerDelegate {
 
   private func setupUI(in view: NSView) {
     createSearchField(in: view)
-    createTableView(in: view)
+    createScrollView(in: view)
     setupConstraints(in: view)
 
-    // Setup controllers
+    // Setup controllers to control inner views
     searchController.setupSearchField(searchField, tableView: tableView)
     tableViewController.setupTableView(tableView)
   }
@@ -78,7 +92,7 @@ class MainViewController: DataManagerDelegate, SearchControllerDelegate {
     view.addSubview(searchField)
   }
 
-  private func createTableView(in view: NSView) {
+  private func createScrollView(in view: NSView) {
     let scrollView = NSScrollView()
     scrollView.translatesAutoresizingMaskIntoConstraints = false
     scrollView.drawsBackground = false

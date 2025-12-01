@@ -1,7 +1,20 @@
 import Cocoa
 
 @MainActor
-class TableViewController: NSObject, NSTableViewDataSource, NSTableViewDelegate {
+protocol TableViewControllerDelegate: AnyObject {
+  func didRequestClose()
+  func didRequestSwitch()
+  func didRequestSearchMode()
+}
+
+@MainActor
+class TableViewController:
+  NSObject,
+  NSTableViewDataSource,
+  NSTableViewDelegate,
+  VimTableViewDelegate
+{
+  weak var delegate: TableViewControllerDelegate?
   private let dataManager: DataManager
   private weak var tableView: VimTableView?
 
@@ -13,6 +26,7 @@ class TableViewController: NSObject, NSTableViewDataSource, NSTableViewDelegate 
   func setupTableView(_ tableView: VimTableView) {
     self.tableView = tableView
     tableView.delegate = self
+    tableView.controllerDelegate = self
     tableView.dataSource = self
     tableView.rowHeight = 28
     tableView.headerView = nil
@@ -25,9 +39,29 @@ class TableViewController: NSObject, NSTableViewDataSource, NSTableViewDelegate 
     tableView.addTableColumn(column)
   }
 
+  func reloadData() {
+    tableView?.reloadData()
+    guard !dataManager.filteredWindows.isEmpty else { return }
+    tableView?.moveSelection(down: true)
+  }
+
   func activateSelected() {
     guard let row = self.tableView?.selectedRow else { return }
     dataManager.filteredWindows[row].activateFn()
+  }
+
+  // MARK: - VimTableViewDelegate
+
+  func handleEnterKey() {
+    delegate?.didRequestSwitch()
+  }
+
+  func handleEscapeKey() {
+    delegate?.didRequestClose()
+  }
+
+  func handleSlashKey() {
+    delegate?.didRequestSearchMode()
   }
 
   // MARK: - NSTableViewDataSource
@@ -132,7 +166,4 @@ class TableViewController: NSObject, NSTableViewDataSource, NSTableViewDelegate 
     return titleView
   }
 
-  func reloadData() {
-    tableView?.reloadData()
-  }
 }

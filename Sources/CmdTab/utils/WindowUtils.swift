@@ -68,9 +68,6 @@ extension NSRunningApplication {
 
   func tryIntoAXWindows() -> [SwitchableWindow]? {
     let axUI = self.getAxUIElem()
-    if self.getAppUnlocalizedName() == "Arc" {
-      print("ARC here!!")
-    }
 
     var res: [SwitchableWindow] = []
 
@@ -100,7 +97,6 @@ extension NSRunningApplication {
       kAXHiddenAttribute as CFString,
       &hidden
     )
-    print(self.getAppUnlocalizedName() ?? self.localizedName ?? "UNKNOWN_APP", hidden as Any)
     if let h = hidden as? Int, h == 0 {
       return false
     }
@@ -117,6 +113,7 @@ extension NSRunningApplication {
         activateFn: {
           // has window, activate it
           if let windowElement = win {
+            // before activate the window, put it to front
             AXUIElementPerformAction(windowElement, kAXRaiseAction as CFString)
             self.activate()
             return
