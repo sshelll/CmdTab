@@ -161,7 +161,7 @@ class TableViewController:
     titleView.translatesAutoresizingMaskIntoConstraints = false
     titleView.lineBreakMode = .byTruncatingTail
     titleView.setContentHuggingPriority(.defaultLow, for: .horizontal)
-    titleView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+    titleView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
     return titleView
   }

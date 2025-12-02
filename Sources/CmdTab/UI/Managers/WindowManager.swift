@@ -22,12 +22,13 @@ class WindowManager {
   }
 
   private func configureWindow(_ window: Window) {
-    window.isOpaque = false
-    window.backgroundColor = .clear
+    window.styleMask = [.titled, .fullSizeContentView]
     window.titleVisibility = .hidden
     window.titlebarAppearsTransparent = true
-    window.level = .floating
-    window.isMovableByWindowBackground = true
+
+    window.isOpaque = false
+    window.backgroundColor = .clear
+    window.hasShadow = true
 
     let contentView = createContentView(for: window)
     window.contentView = contentView
@@ -35,18 +36,24 @@ class WindowManager {
 
   private func createContentView(for window: Window) -> NSVisualEffectView {
     let contentView = NSVisualEffectView(frame: window.contentView!.bounds)
+    contentView.blendingMode = .behindWindow
     contentView.autoresizingMask = [.width, .height]
     contentView.material = .sidebar
     contentView.state = .active
     contentView.wantsLayer = true
     contentView.layer?.cornerRadius = 18
     contentView.layer?.masksToBounds = true
+    contentView.layer?.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
 
     return contentView
   }
 
   func showWindow() {
     guard let window = window else { return }
+
+    // must set this to avoid space switch
+    window.collectionBehavior = [.moveToActiveSpace]
+
     // always display on main screen
     if let mainScreen = NSScreen.screens.first {
       let visibleFrame = mainScreen.visibleFrame
@@ -59,8 +66,8 @@ class WindowManager {
       let newFrame = CGRect(x: x, y: y, width: windowSize.width, height: windowSize.height)
       window.setFrame(newFrame, display: true)
     }
+
     window.makeKeyAndOrderFront(nil)
-    // window.center()
   }
 
   func hideWindow() {
