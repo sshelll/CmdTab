@@ -6,13 +6,13 @@ protocol SearchControllerDelegate: AnyObject {
   func didRequestSwitch()
 }
 
+@available(macOS 12.0, *)
 @MainActor
-class SearchController: NSObject, NSSearchFieldDelegate {
+class SearchController: NSObject {
   weak var delegate: SearchControllerDelegate?
   private let dataManager: DataManager
   private let tableViewController: TableViewController
-  private weak var searchField: NSSearchField?
-  private weak var tableView: VimTableView?
+  private weak var searchCoordinator: GlassmorphismSearchCoordinator?
 
   init(dataManager: DataManager, tableViewController: TableViewController) {
     self.dataManager = dataManager
@@ -20,66 +20,13 @@ class SearchController: NSObject, NSSearchFieldDelegate {
     super.init()
   }
 
-  func setupSearchField(_ searchField: NSSearchField, tableView: VimTableView) {
-    self.searchField = searchField
-    self.tableView = tableView
-    searchField.delegate = self
+  func setupSearchCoordinator(_ coordinator: GlassmorphismSearchCoordinator) {
+    self.searchCoordinator = coordinator
   }
 
   func clearSearch() {
-    searchField?.stringValue = ""
+    searchCoordinator?.setText("")
     dataManager.updateSearchQuery("")
     tableViewController.reloadData()
-  }
-
-  // MARK: - NSSearchFieldDelegate
-
-  func controlTextDidChange(_ obj: Notification) {
-    guard let searchField = obj.object as? NSSearchField else { return }
-    let searchText = searchField.stringValue
-
-    dataManager.updateSearchQuery(searchText)
-    tableViewController.reloadData()
-  }
-
-  func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector)
-    -> Bool
-  {
-    guard let tableView = tableView else { return false }
-
-    switch commandSelector {
-    case #selector(NSResponder.moveDown(_:)),
-      #selector(NSResponder.moveRight(_:)),
-      #selector(NSResponder.insertTab(_:)):
-      // ↓ and → and <tab> moves down
-      tableView.moveSelection(down: true)
-      return true
-    case #selector(NSResponder.moveUp(_:)),
-      #selector(NSResponder.moveLeft(_:)),
-      #selector(NSResponder.insertBacktab(_:)):
-      // ↑ and ← and <shift-tab> moves up
-      tableView.moveSelection(down: false)
-      return true
-    case #selector(NSResponder.insertNewline(_:)):
-      // Handle Enter key - could trigger window switching
-      handleEnterKey()
-      return true
-    case #selector(NSResponder.cancelOperation(_:)):
-      // Handle Escape key - could close the window
-      handleEscapeKey()
-      return true
-    default:
-      return false
-    }
-  }
-
-  // MARK: - Private Methods
-
-  private func handleEnterKey() {
-    delegate?.didRequestSwitch()
-  }
-
-  private func handleEscapeKey() {
-    delegate?.didRequestNormalMode()
   }
 }

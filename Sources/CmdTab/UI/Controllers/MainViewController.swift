@@ -1,5 +1,6 @@
 import Cocoa
 
+@available(macOS 12.0, *)
 @MainActor
 class MainViewController:
   DataManagerDelegate,
@@ -14,7 +15,8 @@ class MainViewController:
   private let tableViewController: TableViewController
   private let searchController: SearchController
 
-  private var searchField: NSSearchField!
+  // 替换为 SwiftUI 搜索框协调器
+  private var searchCoordinator: GlassmorphismSearchCoordinator!
   private var tableView: VimTableView!
 
   init() {
@@ -26,7 +28,7 @@ class MainViewController:
     self.tableViewController = TableViewController(dataManager: dataManager)
     self.searchController = SearchController(
       dataManager: dataManager,
-      tableViewController: tableViewController,
+      tableViewController: tableViewController
     )
 
     // Set up delegation
@@ -66,7 +68,7 @@ class MainViewController:
   }
 
   func didRequestSearchMode() {
-    windowManager.getWindow()?.makeFirstResponder(searchField)
+    let _ = searchCoordinator.becomeFirstResponder()
   }
 
   func didRequestNormalMode() {
@@ -93,19 +95,43 @@ class MainViewController:
     setupConstraints(in: view)
 
     // Setup controllers to control inner views
-    searchController.setupSearchField(searchField, tableView: tableView)
+    searchController.setupSearchCoordinator(searchCoordinator)
     tableViewController.setupTableView(tableView)
   }
 
   private func createSearchField(in view: NSView) {
-    searchField = NSSearchField()
-    searchField.translatesAutoresizingMaskIntoConstraints = false
-    searchField.placeholderString = "press 'i', '/' or 'a' to search and press 'esc' to quit"
-    // searchField.placeholderString = "press 'i', '/' or 'a' to search and press esc to quit"
-    // if #available(macOS 10.14, *) {
-    //   searchField.appearance = NSAppearance(named: .aqua)
-    // }
-    view.addSubview(searchField)
+    searchCoordinator = GlassmorphismSearchCoordinator()
+
+    // 设置文本变化回调
+    searchCoordinator.onTextChange = { [weak self] text in
+      guard let self = self else { return }
+      self.dataManager.updateSearchQuery(text)
+      self.tableViewController.reloadData()
+    }
+
+    // 设置键盘事件回调
+    searchCoordinator.onMoveDown = { [weak self] in
+      self?.tableView.moveSelection(down: true)
+    }
+
+    searchCoordinator.onMoveUp = { [weak self] in
+      self?.tableView.moveSelection(down: false)
+    }
+
+    searchCoordinator.onEnter = { [weak self] in
+      guard let self = self else { return }
+      self.tableViewController.activateSelected()
+      self.didRequestClose()
+    }
+
+    searchCoordinator.onEscape = { [weak self] in
+      guard let self = self else { return }
+      self.windowManager.getWindow()?.makeFirstResponder(self.tableView)
+    }
+
+    // 创建 SwiftUI 搜索框视图
+    let hostingView = searchCoordinator.createHostingView()
+    view.addSubview(hostingView)
   }
 
   private func createScrollView(in view: NSView) {
@@ -123,16 +149,17 @@ class MainViewController:
 
   private func setupConstraints(in view: NSView) {
     guard let scrollView = tableView.enclosingScrollView else { return }
+    guard let searchView = searchCoordinator.getHostingView() else { return }
 
     NSLayoutConstraint.activate([
       // Search field constraints
-      searchField.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
-      searchField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-      searchField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-      searchField.heightAnchor.constraint(equalToConstant: 30),
+      searchView.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
+      searchView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+      searchView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+      searchView.heightAnchor.constraint(equalToConstant: 44),
 
       // ScrollView constraints
-      scrollView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 10),
+      scrollView.topAnchor.constraint(equalTo: searchView.bottomAnchor, constant: 10),
       scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
       scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
       scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),

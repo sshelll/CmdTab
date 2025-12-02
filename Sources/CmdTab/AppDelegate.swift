@@ -1,5 +1,6 @@
 import Cocoa
 
+@available(macOS 12.0, *)
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   private var mainViewController: MainViewController?

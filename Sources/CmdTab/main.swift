@@ -1,5 +1,6 @@
 import Cocoa
 
+@available(macOS 12.0, *)
 @MainActor
 func main() {
   // Check accessibility permissions first
@@ -20,4 +21,8 @@ func main() {
   app.run()
 }
 
-main()
+if #available(macOS 12.0, *) {
+  main()
+} else {
+  abort()
+}

@@ -64,9 +64,6 @@ class DataManager {
     if searchQuery.isEmpty {
       // When no search query, sort by app activation order
       var sortedWindows = appOrderManager.sortWindowsByAppOrder(switchableWindows) { $0.pid }
-      print(
-        "switchableWindows count: \(switchableWindows.count), sortedWindows count: \(sortedWindows.count)"
-      )
       if sortedWindows.count > 1 {
         // swap the first 2
         sortedWindows.swapAt(0, 1)
