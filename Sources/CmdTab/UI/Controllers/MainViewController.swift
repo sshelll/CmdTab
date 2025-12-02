@@ -100,7 +100,7 @@ class MainViewController:
   private func createSearchField(in view: NSView) {
     searchField = NSSearchField()
     searchField.translatesAutoresizingMaskIntoConstraints = false
-    searchField.placeholderString = "press 'i', '/' or 'a' to search and press esc to quit"
+    searchField.placeholderString = "press 'i', '/' or 'a' to search and press 'esc' to quit"
     // searchField.placeholderString = "press 'i', '/' or 'a' to search and press esc to quit"
     // if #available(macOS 10.14, *) {
     //   searchField.appearance = NSAppearance(named: .aqua)
