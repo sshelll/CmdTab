@@ -102,14 +102,14 @@ class MainViewController:
   private func createSearchField(in view: NSView) {
     searchCoordinator = GlassmorphismSearchCoordinator()
 
-    // 设置文本变化回调
+    // search text change
     searchCoordinator.onTextChange = { [weak self] text in
       guard let self = self else { return }
       self.dataManager.updateSearchQuery(text)
       self.tableViewController.reloadData()
     }
 
-    // 设置键盘事件回调
+    // move selection
     searchCoordinator.onMoveDown = { [weak self] in
       self?.tableView.moveSelection(down: true)
     }
@@ -120,16 +120,14 @@ class MainViewController:
 
     searchCoordinator.onEnter = { [weak self] in
       guard let self = self else { return }
-      self.tableViewController.activateSelected()
-      self.didRequestClose()
+      self.didRequestSwitch()
     }
 
     searchCoordinator.onEscape = { [weak self] in
       guard let self = self else { return }
-      self.windowManager.getWindow()?.makeFirstResponder(self.tableView)
+      self.didRequestNormalMode()
     }
 
-    // 创建 SwiftUI 搜索框视图
     let hostingView = searchCoordinator.createHostingView()
     view.addSubview(hostingView)
   }

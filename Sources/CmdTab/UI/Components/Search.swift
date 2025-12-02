@@ -1,13 +1,15 @@
 import AppKit
 import SwiftUI
 
-// MARK: - 自定义 TextField 支持特殊键盘事件
+let PLACEHOLDER = "press 'i', '/' or 'a' to search and press 'esc' to quit"
+
+// MARK: - Custom TextField with Special Keyboard Event Support
 @available(macOS 12.0, *)
 class CustomTextField: NSTextField {
   var onSpecialKey: ((NSEvent) -> Bool)?
 
   override func performKeyEquivalent(with event: NSEvent) -> Bool {
-    // 处理特殊键
+    // Handle special keys
     if let handler = onSpecialKey, handler(event) {
       return true
     }
@@ -15,7 +17,7 @@ class CustomTextField: NSTextField {
   }
 
   override func keyDown(with event: NSEvent) {
-    // 处理特殊键
+    // Handle special keys
     if let handler = onSpecialKey, handler(event) {
       return
     }
@@ -23,7 +25,7 @@ class CustomTextField: NSTextField {
   }
 }
 
-// MARK: - 自定义 TextField Representable - 直接控制焦点
+// MARK: - Custom TextField Representable with Direct Focus Control
 @available(macOS 12.0, *)
 struct FocusableTextField: NSViewRepresentable {
   @Binding var text: String
@@ -46,10 +48,10 @@ struct FocusableTextField: NSViewRepresentable {
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector)
       -> Bool
     {
-      // 处理键盘命令
+      // Handle keyboard commands
       switch commandSelector {
       case #selector(NSResponder.cancelOperation(_:)):
-        // Escape 键
+        // Escape key
         if let event = NSApp.currentEvent,
           let handler = parent.onSpecialKey,
           handler(event)
@@ -57,7 +59,7 @@ struct FocusableTextField: NSViewRepresentable {
           return true
         }
       case #selector(NSResponder.insertNewline(_:)):
-        // Enter 键
+        // Enter key
         parent.onCommit()
         return true
       case #selector(NSResponder.moveDown(_:)),
@@ -66,7 +68,7 @@ struct FocusableTextField: NSViewRepresentable {
         #selector(NSResponder.moveRight(_:)),
         #selector(NSResponder.insertTab(_:)),
         #selector(NSResponder.insertBacktab(_:)):
-        // 方向键和 Tab 键
+        // Arrow keys and Tab key
         if let event = NSApp.currentEvent,
           let handler = parent.onSpecialKey,
           handler(event)
@@ -102,10 +104,10 @@ struct FocusableTextField: NSViewRepresentable {
     textField.textColor = .white
     textField.placeholderString = placeholder
 
-    // 传递特殊键处理器
+    // Pass special key handler
     textField.onSpecialKey = onSpecialKey
 
-    // 设置 placeholder 颜色
+    // Set placeholder color
     if let placeholder = textField.placeholderString {
       let attributes: [NSAttributedString.Key: Any] = [
         .foregroundColor: NSColor.white.withAlphaComponent(0.5),
@@ -128,7 +130,7 @@ struct FocusableTextField: NSViewRepresentable {
   }
 }
 
-// MARK: - SwiftUI 毛玻璃搜索框
+// MARK: - SwiftUI Glassmorphism Search Field
 @available(macOS 12.0, *)
 struct GlassmorphismSearchField: View {
   @Binding var text: String
@@ -166,10 +168,10 @@ struct GlassmorphismSearchField: View {
     .padding(.vertical, 10)
     .background(
       ZStack {
-        // 毛玻璃背景
+        // Glassmorphism background
         VisualEffectBlur(material: .hudWindow, blendingMode: .behindWindow)
 
-        // 渐变边框
+        // Gradient border
         RoundedRectangle(cornerRadius: 12)
           .strokeBorder(
             LinearGradient(
@@ -189,7 +191,7 @@ struct GlassmorphismSearchField: View {
   }
 }
 
-// MARK: - NSVisualEffectView 包装
+// MARK: - NSVisualEffectView Wrapper
 struct VisualEffectBlur: NSViewRepresentable {
   var material: NSVisualEffectView.Material
   var blendingMode: NSVisualEffectView.BlendingMode
@@ -208,7 +210,7 @@ struct VisualEffectBlur: NSViewRepresentable {
   }
 }
 
-// MARK: - 自定义 NSHostingView 支持键盘事件
+// MARK: - Custom NSHostingView with Keyboard Event Support
 @available(macOS 12.0, *)
 class KeyboardHostingView<Content: View>: NSHostingView<Content> {
   var keyDownHandler: ((NSEvent) -> Bool)?
@@ -216,7 +218,7 @@ class KeyboardHostingView<Content: View>: NSHostingView<Content> {
   override var acceptsFirstResponder: Bool { true }
 
   override func becomeFirstResponder() -> Bool {
-    // 尝试找到内部的 NSTextField 并让它成为 first responder
+    // Try to find the internal NSTextField and make it the first responder
     if let textField = findTextField(in: self) {
       return window?.makeFirstResponder(textField) ?? false
     }
@@ -230,7 +232,7 @@ class KeyboardHostingView<Content: View>: NSHostingView<Content> {
     super.keyDown(with: event)
   }
 
-  // 递归查找 NSTextField
+  // Recursively find NSTextField
   private func findTextField(in view: NSView) -> NSTextField? {
     if let textField = view as? NSTextField {
       return textField
@@ -244,7 +246,7 @@ class KeyboardHostingView<Content: View>: NSHostingView<Content> {
   }
 }
 
-// MARK: - 搜索框协调器
+// MARK: - Search Field Coordinator
 @available(macOS 12.0, *)
 @MainActor
 class GlassmorphismSearchCoordinator: NSObject {
@@ -252,7 +254,7 @@ class GlassmorphismSearchCoordinator: NSObject {
   private var textBinding: Binding<String>!
   private var textState: TextState!
 
-  // 键盘事件回调
+  // Keyboard event callbacks
   var onTextChange: ((String) -> Void)?
   var onMoveDown: (() -> Void)?
   var onMoveUp: (() -> Void)?
@@ -260,7 +262,7 @@ class GlassmorphismSearchCoordinator: NSObject {
   var onEscape: (() -> Void)?
 
   func createHostingView(initialText: String = "") -> NSView {
-    // 创建 Published 属性来驱动 SwiftUI
+    // Create Published property to drive SwiftUI
     textState = TextState(text: initialText)
 
     textBinding = Binding(
@@ -273,7 +275,7 @@ class GlassmorphismSearchCoordinator: NSObject {
 
     let searchField = GlassmorphismSearchField(
       text: textBinding,
-      placeholder: "press 'i', '/' or 'a' to search and press 'esc' to quit",
+      placeholder: PLACEHOLDER,
       onCommit: { [weak self] in
         self?.onEnter?()
       },
@@ -285,7 +287,7 @@ class GlassmorphismSearchCoordinator: NSObject {
     hostingView = KeyboardHostingView(rootView: searchField)
     hostingView.translatesAutoresizingMaskIntoConstraints = false
 
-    // 设置键盘事件处理（作为备用）
+    // Set keyboard event handler (as fallback)
     hostingView.keyDownHandler = { [weak self] event in
       return self?.handleKeyEvent(event) ?? false
     }
@@ -302,14 +304,14 @@ class GlassmorphismSearchCoordinator: NSObject {
   }
 
   func becomeFirstResponder() -> Bool {
-    // 直接查找并聚焦内部的 NSTextField
+    // Directly find and focus the internal NSTextField
     if let textField = findTextField(in: hostingView) {
       return hostingView.window?.makeFirstResponder(textField) ?? false
     }
     return hostingView.window?.makeFirstResponder(hostingView) ?? false
   }
 
-  // 递归查找 NSTextField
+  // Recursively find NSTextField
   private func findTextField(in view: NSView?) -> NSTextField? {
     guard let view = view else { return nil }
 
@@ -326,9 +328,9 @@ class GlassmorphismSearchCoordinator: NSObject {
   }
 
   private func handleKeyEvent(_ event: NSEvent) -> Bool {
-    // 处理特殊键
+    // leave cmd+? to the os
     if event.modifierFlags.contains(.command) {
-      return false  // 让系统处理 Command 组合键
+      return false
     }
 
     switch event.keyCode {
@@ -356,7 +358,7 @@ class GlassmorphismSearchCoordinator: NSObject {
     }
   }
 
-  // 内部状态类
+  // inner stateful class, use it to listen text change
   private class TextState: ObservableObject {
     @Published var text: String
 
