@@ -6,8 +6,10 @@ class MainViewController:
   SearchControllerDelegate,
   TableViewControllerDelegate
 {
+  private let appOrderManager: AppOrderManager
   private let dataManager: DataManager
   private let windowManager: WindowManager
+  private let appObserver: AppObserver
 
   private let tableViewController: TableViewController
   private let searchController: SearchController
@@ -16,8 +18,11 @@ class MainViewController:
   private var tableView: VimTableView!
 
   init() {
-    self.dataManager = DataManager()
+    self.appOrderManager = AppOrderManager()
+    self.dataManager = DataManager(appOrderManager: appOrderManager)
     self.windowManager = WindowManager()
+    self.appObserver = AppObserver(appOrderManager: appOrderManager)
+
     self.tableViewController = TableViewController(dataManager: dataManager)
     self.searchController = SearchController(
       dataManager: dataManager,
@@ -66,6 +71,12 @@ class MainViewController:
 
   func didRequestNormalMode() {
     windowManager.getWindow()?.makeFirstResponder(tableView)
+  }
+
+  // MARK: - Cleanup
+
+  func cleanup() {
+    appObserver.cleanup()
   }
 
   // MARK: - DataManagerDelegate

@@ -22,6 +22,7 @@ class DataManager {
   weak var delegate: DataManagerDelegate?
 
   let fuse = Fuse()
+  private let appOrderManager: AppOrderManager
 
   var switchableWindows: [SwitchableWindow] = [] {
     didSet {
@@ -44,7 +45,8 @@ class DataManager {
     }
   }
 
-  init() {
+  init(appOrderManager: AppOrderManager) {
+    self.appOrderManager = appOrderManager
     loadSwitchableWindows()
   }
 
@@ -60,7 +62,17 @@ class DataManager {
 
   private func filterWindowsByFuse() {
     if searchQuery.isEmpty {
-      windowSearchResults = switchableWindows.map { window in
+      // When no search query, sort by app activation order
+      var sortedWindows = appOrderManager.sortWindowsByAppOrder(switchableWindows) { $0.pid }
+      print(
+        "switchableWindows count: \(switchableWindows.count), sortedWindows count: \(sortedWindows.count)"
+      )
+      if sortedWindows.count > 1 {
+        // swap the first 2
+        sortedWindows.swapAt(0, 1)
+      }
+
+      windowSearchResults = sortedWindows.map { window in
         WindowSearchResult(
           window: window,
           appNameMatches: [],

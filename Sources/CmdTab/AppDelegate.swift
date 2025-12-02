@@ -15,7 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   }
 
   func applicationWillTerminate(_ notification: Notification) {
-    // Cleanup if needed
+    mainViewController?.cleanup()
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

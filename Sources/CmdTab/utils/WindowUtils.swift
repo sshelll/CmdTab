@@ -12,22 +12,8 @@ struct SwitchableWindow {
 }
 
 func listRunningApplications() -> [NSRunningApplication] {
-  var res: [NSRunningApplication] = []
-
-  let frontmostApp = NSWorkspace.shared.frontmostApplication
-  let frontmostAppPid = frontmostApp?.processIdentifier
-  if let app = frontmostApp {
-    res.append(app)
-  }
-
-  res.append(
-    contentsOf: NSWorkspace.shared.runningApplications
-      .filter {
-        $0.activationPolicy == .regular && frontmostAppPid != $0.processIdentifier
-      }
-  )
-
-  return res
+  return NSWorkspace.shared.runningApplications
+    .filter { $0.activationPolicy == .regular }
 }
 
 func listSwitchableWindows() -> [SwitchableWindow] {
