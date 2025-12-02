@@ -38,7 +38,11 @@ class WindowManager {
     let contentView = NSVisualEffectView(frame: window.contentView!.bounds)
     contentView.blendingMode = .behindWindow
     contentView.autoresizingMask = [.width, .height]
-    contentView.material = .sidebar
+    if #available(macOS 10.14, *) {
+      contentView.material = .hudWindow
+    } else {
+      contentView.material = .sidebar
+    }
     contentView.state = .active
     contentView.wantsLayer = true
     contentView.layer?.cornerRadius = 18

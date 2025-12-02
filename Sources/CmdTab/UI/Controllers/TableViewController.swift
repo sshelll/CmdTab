@@ -41,13 +41,13 @@ class TableViewController:
 
   func reloadData() {
     tableView?.reloadData()
-    guard !dataManager.filteredWindows.isEmpty else { return }
+    guard !dataManager.windowSearchResults.isEmpty else { return }
     tableView?.moveSelection(down: true)
   }
 
   func activateSelected() {
     guard let row = self.tableView?.selectedRow else { return }
-    dataManager.filteredWindows[row].activateFn()
+    dataManager.windowSearchResults[row].window.activateFn()
   }
 
   // MARK: - VimTableViewDelegate
@@ -67,7 +67,7 @@ class TableViewController:
   // MARK: - NSTableViewDataSource
 
   func numberOfRows(in tableView: NSTableView) -> Int {
-    return dataManager.filteredWindows.count
+    return dataManager.windowSearchResults.count
   }
 
   // MARK: - NSTableViewDelegate
@@ -79,10 +79,10 @@ class TableViewController:
   ) -> NSView? {
     let cell = NSTableCellView()
 
-    guard row < dataManager.filteredWindows.count else { return cell }
-    let window = dataManager.filteredWindows[row]
+    guard row < dataManager.windowSearchResults.count else { return cell }
+    let searchResult = dataManager.windowSearchResults[row]
 
-    let stackView = createWindowRowView(for: window)
+    let stackView = createWindowRowView(for: searchResult)
     cell.addSubview(stackView)
 
     NSLayoutConstraint.activate([
@@ -100,11 +100,12 @@ class TableViewController:
 
   // MARK: - Private Methods
 
-  private func createWindowRowView(for window: SwitchableWindow) -> NSStackView {
+  private func createWindowRowView(for searchResult: WindowSearchResult) -> NSStackView {
+    let window = searchResult.window
     let iconView = createIconView(for: window)
-    let appView = createAppNameView(for: window)
+    let appView = createAppNameView(for: searchResult)
     let separatorView = createSeparatorView()
-    let titleView = createAppTitleView(for: window)
+    let titleView = createAppTitleView(for: searchResult)
 
     let stackView = NSStackView()
     stackView.orientation = .horizontal
@@ -133,12 +134,20 @@ class TableViewController:
     return iconView
   }
 
-  private func createAppNameView(for window: SwitchableWindow) -> NSTextField {
-    let appView = NSTextField(labelWithString: window.appName)
-    appView.font = .systemFont(ofSize: 16)
-    appView.textColor = .labelColor
+  private func createAppNameView(for searchResult: WindowSearchResult) -> NSTextField {
+    let appView = NSTextField()
+
+    appView.attributedStringValue = createHighlightedTextWithIndices(
+      text: searchResult.window.appName,
+      matchIndices: searchResult.appNameMatches,
+      font: .systemFont(ofSize: 16),
+      textColor: .labelColor,
+      highlightColor: .systemYellow
+    )
+    appView.isEditable = false
+    appView.isBordered = false
+    appView.backgroundColor = .clear
     appView.translatesAutoresizingMaskIntoConstraints = false
-    appView.lineBreakMode = .byTruncatingTail
     appView.widthAnchor.constraint(equalToConstant: dataManager.maxAppNameWidth).isActive = true
 
     return appView
@@ -154,16 +163,101 @@ class TableViewController:
     return separatorView
   }
 
-  private func createAppTitleView(for window: SwitchableWindow) -> NSTextField {
-    let titleView = NSTextField(labelWithString: window.windowTitle)
-    titleView.font = .systemFont(ofSize: 16)
-    titleView.textColor = .labelColor
+  private func createAppTitleView(for searchResult: WindowSearchResult) -> NSTextField {
+    let titleView = NSTextField()
+
+    titleView.attributedStringValue = createHighlightedTextWithIndices(
+      text: searchResult.window.windowTitle,
+      matchIndices: searchResult.titleMatches,
+      font: .systemFont(ofSize: 16),
+      textColor: .labelColor,
+      highlightColor: .systemYellow
+    )
+    titleView.isEditable = false
+    titleView.isBordered = false
+    titleView.backgroundColor = .clear
     titleView.translatesAutoresizingMaskIntoConstraints = false
-    titleView.lineBreakMode = .byTruncatingTail
     titleView.setContentHuggingPriority(.defaultLow, for: .horizontal)
     titleView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
     return titleView
+  }
+
+  // MARK: - Text Highlighting Helper
+
+  private func createHighlightedTextWithIndices(
+    text: String,
+    matchIndices: [Int],
+    font: NSFont,
+    textColor: NSColor,
+    highlightColor: NSColor
+  ) -> NSAttributedString {
+    let attributedString = NSMutableAttributedString(string: text)
+
+    // Create paragraph style for line breaking
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.lineBreakMode = .byTruncatingTail
+
+    // Set default attributes including paragraph style
+    attributedString.addAttribute(
+      .font, value: font, range: NSRange(location: 0, length: text.count))
+    attributedString.addAttribute(
+      .foregroundColor, value: textColor, range: NSRange(location: 0, length: text.count))
+    attributedString.addAttribute(
+      .paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: text.count))
+
+    // Highlight individual characters based on match indices from Fuse
+    for index in matchIndices {
+      guard index < text.count else { continue }
+      let nsRange = NSRange(location: index, length: 1)
+      attributedString.addAttribute(.foregroundColor, value: highlightColor, range: nsRange)
+    }
+
+    return attributedString
+  }
+
+  private func createHighlightedText(
+    text: String,
+    searchQuery: String,
+    font: NSFont,
+    textColor: NSColor,
+    highlightColor: NSColor
+  ) -> NSAttributedString {
+    let attributedString = NSMutableAttributedString(string: text)
+
+    // Create paragraph style for line breaking
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.lineBreakMode = .byTruncatingTail
+
+    // Set default attributes including paragraph style
+    attributedString.addAttribute(
+      .font, value: font, range: NSRange(location: 0, length: text.count))
+    attributedString.addAttribute(
+      .foregroundColor, value: textColor, range: NSRange(location: 0, length: text.count))
+    attributedString.addAttribute(
+      .paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: text.count))
+
+    // If no search query, return the string with default attributes
+    guard !searchQuery.isEmpty else {
+      return attributedString
+    }
+
+    // Find and highlight all occurrences of the search query (case insensitive)
+    let lowercaseText = text.lowercased()
+    let lowercaseQuery = searchQuery.lowercased()
+
+    var searchRange = lowercaseText.startIndex
+    while let range = lowercaseText.range(
+      of: lowercaseQuery, range: searchRange..<lowercaseText.endIndex)
+    {
+      let nsRange = NSRange(range, in: text)
+      attributedString.addAttribute(.foregroundColor, value: highlightColor, range: nsRange)
+
+      // Move search range to continue looking for more matches
+      searchRange = range.upperBound
+    }
+
+    return attributedString
   }
 
 }
