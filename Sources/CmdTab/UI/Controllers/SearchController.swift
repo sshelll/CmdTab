@@ -48,12 +48,16 @@ class SearchController: NSObject, NSSearchFieldDelegate {
     guard let tableView = tableView else { return false }
 
     switch commandSelector {
-    case #selector(NSResponder.moveDown(_:)), #selector(NSResponder.moveRight(_:)):
-      // ↓ and → moves down
+    case #selector(NSResponder.moveDown(_:)),
+      #selector(NSResponder.moveRight(_:)),
+      #selector(NSResponder.insertTab(_:)):
+      // ↓ and → and <tab> moves down
       tableView.moveSelection(down: true)
       return true
-    case #selector(NSResponder.moveUp(_:)), #selector(NSResponder.moveLeft(_:)):
-      // ↑ and ← moves up
+    case #selector(NSResponder.moveUp(_:)),
+      #selector(NSResponder.moveLeft(_:)),
+      #selector(NSResponder.insertBacktab(_:)):
+      // ↑ and ← and <shift-tab> moves up
       tableView.moveSelection(down: false)
       return true
     case #selector(NSResponder.insertNewline(_:)):

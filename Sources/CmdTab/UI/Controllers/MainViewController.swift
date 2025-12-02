@@ -89,6 +89,9 @@ class MainViewController:
   private func createSearchField(in view: NSView) {
     searchField = NSSearchField()
     searchField.translatesAutoresizingMaskIntoConstraints = false
+    // if #available(macOS 10.14, *) {
+    //   searchField.appearance = NSAppearance(named: .aqua)
+    // }
     view.addSubview(searchField)
   }
 

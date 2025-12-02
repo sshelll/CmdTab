@@ -29,10 +29,16 @@ class VimTableView: NSTableView {
       }
     case "\u{1b}":  // Escape key
       controllerDelegate?.handleEscapeKey()
-    case "/":
+    case "/", "i", "a":
       controllerDelegate?.handleSlashKey()
     default:
       switch event.keyCode {
+      case 48:  // Tab
+        if event.modifierFlags.contains(.shift) {
+          moveSelection(down: false)
+        } else {
+          moveSelection(down: true)
+        }
       case 125, 124:  // down + right arrow
         moveSelection(down: true)
       case 126, 123:  // up + left arrow
