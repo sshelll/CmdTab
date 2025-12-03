@@ -4,11 +4,23 @@
 
 A modern, customizable(in the future) application switcher for macOS that enhances the default Cmd+Tab experience with a sleek interface and powerful search capabilities.
 
-## Demo
+# Table of contents
+
+- [CmdTab](#cmdtab)
+  - [1. Demo](#1.-demo)
+  - [2. Features](#2.-features)
+  - [3. Installation](#3.-installation)
+    - [3.1 Download From Release](#3.1-download-from-release)
+    - [3.2 Homebrew](#3.2-homebrew)
+  - [4. Usage](#4.-usage)
+  - [5. Requirements](#5.-requirements)
+  - [6. License](#6.-license)
+
+## 1. Demo
 
 ![Demo](artifacts/demo.gif)
 
-## Features
+## 2. Features
 
 - 🎨 **Modern UI** - Beautiful glassmorphism design with smooth animations
 - 🔍 **Quick Search** - Press 'i', '/', or 'a' to search applications instantly
@@ -17,9 +29,9 @@ A modern, customizable(in the future) application switcher for macOS that enhanc
 - 🚀 **Fast & Lightweight** - Native Swift implementation for optimal performance
 - 🎯 **Smart Filtering** - Quickly find and switch to any running application
 
-## Installation
+## 3. Installation
 
-### Download From Release
+### 3.1 Download From Release
 
 Download the latest version from the [Release Page](https://github.com/sshelll/CmdTab/releases).
 
@@ -30,7 +42,7 @@ Download the latest version from the [Release Page](https://github.com/sshelll/C
    - Go to System Settings > Privacy & Security, find the message about CmdTab being blocked, and click "Open Anyway"
 5. Grant necessary permissions when prompted (Accessibility permissions are required for the app to function properly)
 
-### Homebrew
+### 3.2 Homebrew
 
 ```sh
 brew tap sshelll/tap git@github.com:sshelll/homebrew-tap.git
@@ -39,7 +51,7 @@ brew install --cask sshelll/tap/cmdtab
 
 And then follow the step 4 and 5 above to allow and grant permissions.
 
-## Usage
+## 4. Usage
 
 - Press `Cmd+Tab` to open the application switcher
 - Use arrow keys or Tab to navigate between applications
@@ -47,10 +59,10 @@ And then follow the step 4 and 5 above to allow and grant permissions.
 - Press Enter to switch to the selected application
 - Press Esc to close the switcher
 
-## Requirements
+## 5. Requirements
 
 - macOS 12.0 or later
 
-## License
+## 6. License
 
 MIT License
