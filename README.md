@@ -2,7 +2,7 @@
 
 > An alternative for MacOS Cmd+Tab
 
-A modern, customizable application switcher for macOS that enhances the default Cmd+Tab experience with a sleek interface and powerful search capabilities.
+A modern, customizable(in the future) application switcher for macOS that enhances the default Cmd+Tab experience with a sleek interface and powerful search capabilities.
 
 ## Demo
 
