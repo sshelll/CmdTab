@@ -7,3 +7,6 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 nohup.out
+*.dmg
+*.app
+artifacts/*.icns
