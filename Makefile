@@ -2,7 +2,7 @@ APP_NAME := CmdTab
 BUNDLE_ID := com.sshelll.cmdtab
 VERSION := 1.0.0
 
-.PHONY: all dmg app build gen_icon clean run debug
+.PHONY: all dmg app build gen_icon clean run debug sha256
 all: dmg
 
 run:
@@ -73,6 +73,10 @@ dmg: clean gen_icon app
 	  "$(APP_NAME).dmg" \
 	  "$(APP_NAME).app"
 	@echo "✅ Done: $(APP_NAME).dmg"
+	@echo "SHA256: $$(shasum -a 256 CmdTab.dmg)"
+
+sha256:
+	@echo "SHA256: $$(shasum -a 256 CmdTab.dmg)"
 
 gen_icon:
 	@echo "🎨 Generating icon..."
