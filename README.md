@@ -25,8 +25,9 @@ Download the latest version from the [Release Page](https://github.com/sshelll/C
 
 1. Download the `.dmg` file from the releases page
 2. Open the `.dmg` file and drag CmdTab to your Applications folder
-3. Launch CmdTab from your Applications folder
-4. Grant necessary permissions when prompted
+3. **Important**: Since this is a self-built application, macOS will prevent it from opening by default. To allow it:
+   - Go to System Settings > Privacy & Security, find the message about CmdTab being blocked, and click "Open Anyway"
+4. Grant necessary permissions when prompted (Accessibility permissions are required for the app to function properly)
 
 ## Usage
 
