@@ -13,6 +13,7 @@ A modern, customizable(in the future) application switcher for macOS that enhanc
 - 🎨 **Modern UI** - Beautiful glassmorphism design with smooth animations
 - 🔍 **Quick Search** - Press 'i', '/', or 'a' to search applications instantly
 - ⌨️ **Keyboard Navigation** - Navigate with arrow keys, Tab, or Shift+Tab
+- 🖱️ **Mouse Support** - Click to switch applications directly
 - 🚀 **Fast & Lightweight** - Native Swift implementation for optimal performance
 - 🎯 **Smart Filtering** - Quickly find and switch to any running application
 

@@ -4,7 +4,6 @@ import Cocoa
 @MainActor
 class MainViewController:
   DataManagerDelegate,
-  SearchControllerDelegate,
   TableViewControllerDelegate
 {
   private let appOrderManager: AppOrderManager
@@ -33,11 +32,10 @@ class MainViewController:
 
     // Set up delegation
     self.dataManager.delegate = self
-    self.searchController.delegate = self
     self.tableViewController.delegate = self
   }
 
-  func setupMainWindow() -> Window {
+  func setupMainWindow() {
     let window = windowManager.createMainWindow()
 
     guard let contentView = window.contentView else {
@@ -45,12 +43,10 @@ class MainViewController:
     }
 
     setupUI(in: contentView)
-
-    return window
   }
 
   func showWindow() {
-    dataManager.loadSwitchableWindows()
+    dataManager.reloadSwitchableWindows()
     searchController.clearSearch()
     windowManager.showWindow()
     windowManager.getWindow()?.makeFirstResponder(tableView)

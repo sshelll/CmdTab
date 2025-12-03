@@ -1,15 +1,8 @@
 import Cocoa
 
-@MainActor
-protocol SearchControllerDelegate: AnyObject {
-  func didRequestNormalMode()
-  func didRequestSwitch()
-}
-
 @available(macOS 12.0, *)
 @MainActor
 class SearchController: NSObject {
-  weak var delegate: SearchControllerDelegate?
   private let dataManager: DataManager
   private let tableViewController: TableViewController
   private weak var searchCoordinator: GlassmorphismSearchCoordinator?

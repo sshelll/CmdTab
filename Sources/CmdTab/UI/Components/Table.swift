@@ -49,6 +49,20 @@ class VimTableView: NSTableView {
     }
   }
 
+  override func mouseDown(with event: NSEvent) {
+    let point = self.convert(event.locationInWindow, from: nil)
+    let clickedRow = self.row(at: point)
+
+    // Check if clicked on an already selected row
+    guard clickedRow >= 0 && clickedRow == self.selectedRow else {
+      // Let the default behavior handle selection
+      super.mouseDown(with: event)
+      return
+    }
+
+    controllerDelegate?.handleEnterKey()
+  }
+
   func moveSelection(down: Bool) {
     let rowCount = self.numberOfRows
     guard rowCount > 0 else { return }

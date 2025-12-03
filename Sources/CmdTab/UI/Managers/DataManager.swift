@@ -47,10 +47,9 @@ class DataManager {
 
   init(appOrderManager: AppOrderManager) {
     self.appOrderManager = appOrderManager
-    loadSwitchableWindows()
   }
 
-  func loadSwitchableWindows() {
+  func reloadSwitchableWindows() {
     let windows = listSwitchableWindows()
     switchableWindows = windows
     notifyDelegate()

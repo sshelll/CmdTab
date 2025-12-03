@@ -2,11 +2,14 @@ APP_NAME := CmdTab
 BUNDLE_ID := com.sshelll.cmdtab
 VERSION := 1.0.0
 
-.PHONY: all dmg app build gen_icon clean run
+.PHONY: all dmg app build gen_icon clean run debug
 all: dmg
 
 run:
-	nohup swift run CmdTab > nohup.out 2>&1 &
+	@nohup swift run CmdTab > nohup.out 2>&1 &
+
+debug:
+	@swift run CmdTab
 
 build:
 	@echo "🔨 Building $(APP_NAME)..."

@@ -1,8 +1,10 @@
 import Cocoa
 
 @MainActor
-class WindowManager {
+class WindowManager: WindowDelegate {
   private var window: Window?
+
+  // MARK: -- public funcs
 
   func createMainWindow() -> Window {
     let width: CGFloat = 600
@@ -12,14 +14,53 @@ class WindowManager {
       contentRect: NSRect(x: 0, y: 0, width: width, height: height),
       styleMask: [.fullSizeContentView],
       backing: .buffered,
-      defer: false
+      defer_: false,
+      windowDelegate: self,
     )
 
     configureWindow(newWindow)
+
     self.window = newWindow
 
     return newWindow
   }
+
+  func showWindow() {
+    guard let window = window else { return }
+
+    // must set this to avoid space switch
+    window.collectionBehavior = [.moveToActiveSpace]
+
+    // always display on main screen
+    if let mainScreen = NSScreen.screens.first {
+      let visibleFrame = mainScreen.visibleFrame
+
+      let windowSize = window.frame.size
+
+      let x = (visibleFrame.width - windowSize.width) / 2 + visibleFrame.origin.x
+      let y = (visibleFrame.height - windowSize.height) / 2 + visibleFrame.origin.y
+
+      let newFrame = CGRect(x: x, y: y, width: windowSize.width, height: windowSize.height)
+      window.setFrame(newFrame, display: true)
+    }
+
+    window.makeKeyAndOrderFront(nil)
+  }
+
+  func hideWindow() {
+    window?.orderOut(nil)
+  }
+
+  func getWindow() -> Window? {
+    return window
+  }
+
+  // MARK: -- WindowDelegate
+  func onResignKey() {
+    self.hideWindow()
+  }
+
+  // MARK: -- private funcs
 
   private func configureWindow(_ window: Window) {
     window.styleMask = [.titled, .fullSizeContentView]
@@ -52,35 +93,5 @@ class WindowManager {
     contentView.layer?.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
 
     return contentView
-  }
-
-  func showWindow() {
-    guard let window = window else { return }
-
-    // must set this to avoid space switch
-    window.collectionBehavior = [.moveToActiveSpace]
-
-    // always display on main screen
-    if let mainScreen = NSScreen.screens.first {
-      let visibleFrame = mainScreen.visibleFrame
-
-      let windowSize = window.frame.size
-
-      let x = (visibleFrame.width - windowSize.width) / 2 + visibleFrame.origin.x
-      let y = (visibleFrame.height - windowSize.height) / 2 + visibleFrame.origin.y
-
-      let newFrame = CGRect(x: x, y: y, width: windowSize.width, height: windowSize.height)
-      window.setFrame(newFrame, display: true)
-    }
-
-    window.makeKeyAndOrderFront(nil)
-  }
-
-  func hideWindow() {
-    window?.orderOut(nil)
-  }
-
-  func getWindow() -> Window? {
-    return window
   }
 }

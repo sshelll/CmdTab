@@ -5,7 +5,6 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   private var mainViewController: MainViewController?
   private var statusController: StatusController!
-  private var window: Window?
 
   // MARK: -- NSApplicationDelegate
 
@@ -43,8 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
 
     // main win
     mainViewController = MainViewController()
-    window = mainViewController?.setupMainWindow()
-    // mainViewController?.showWindow()
+    mainViewController?.setupMainWindow()
   }
 
   private func setupGlobalHotkey() {
