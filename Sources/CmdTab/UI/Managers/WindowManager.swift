@@ -38,6 +38,8 @@ class WindowManager {
     let contentView = NSVisualEffectView(frame: window.contentView!.bounds)
     contentView.blendingMode = .behindWindow
     contentView.autoresizingMask = [.width, .height]
+    // TODO: customized theme
+    // contentView.appearance = NSAppearance(named: .vibrantLight)
     if #available(macOS 10.14, *) {
       contentView.material = .hudWindow
     } else {

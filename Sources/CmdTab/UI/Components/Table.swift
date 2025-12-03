@@ -72,6 +72,7 @@ class VimTableView: NSTableView {
 class RowView: NSTableRowView {
   override func drawSelection(in dirtyRect: NSRect) {
     if self.isSelected {
+      // TODO: customize theme
       let selectionColor = NSColor.systemOrange.withAlphaComponent(0.4)
       selectionColor.setFill()
 

@@ -142,6 +142,7 @@ class TableViewController:
       matchIndices: searchResult.appNameMatches,
       font: .systemFont(ofSize: 16),
       textColor: .labelColor,
+      // TODO: customized theme
       highlightColor: .systemYellow
     )
     appView.isEditable = false
@@ -171,6 +172,7 @@ class TableViewController:
       matchIndices: searchResult.titleMatches,
       font: .systemFont(ofSize: 16),
       textColor: .labelColor,
+      // TODO: customized theme
       highlightColor: .systemYellow
     )
     titleView.isEditable = false
@@ -215,49 +217,4 @@ class TableViewController:
 
     return attributedString
   }
-
-  private func createHighlightedText(
-    text: String,
-    searchQuery: String,
-    font: NSFont,
-    textColor: NSColor,
-    highlightColor: NSColor
-  ) -> NSAttributedString {
-    let attributedString = NSMutableAttributedString(string: text)
-
-    // Create paragraph style for line breaking
-    let paragraphStyle = NSMutableParagraphStyle()
-    paragraphStyle.lineBreakMode = .byTruncatingTail
-
-    // Set default attributes including paragraph style
-    attributedString.addAttribute(
-      .font, value: font, range: NSRange(location: 0, length: text.count))
-    attributedString.addAttribute(
-      .foregroundColor, value: textColor, range: NSRange(location: 0, length: text.count))
-    attributedString.addAttribute(
-      .paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: text.count))
-
-    // If no search query, return the string with default attributes
-    guard !searchQuery.isEmpty else {
-      return attributedString
-    }
-
-    // Find and highlight all occurrences of the search query (case insensitive)
-    let lowercaseText = text.lowercased()
-    let lowercaseQuery = searchQuery.lowercased()
-
-    var searchRange = lowercaseText.startIndex
-    while let range = lowercaseText.range(
-      of: lowercaseQuery, range: searchRange..<lowercaseText.endIndex)
-    {
-      let nsRange = NSRange(range, in: text)
-      attributedString.addAttribute(.foregroundColor, value: highlightColor, range: nsRange)
-
-      // Move search range to continue looking for more matches
-      searchRange = range.upperBound
-    }
-
-    return attributedString
-  }
-
 }

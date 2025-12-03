@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 let PLACEHOLDER = "press 'i', '/' or 'a' to search and press 'esc' to quit"
+let MAX_INPUT_LIMIT = 20
 
 // MARK: - Custom TextField with Special Keyboard Event Support
 @available(macOS 12.0, *)
@@ -42,6 +43,13 @@ struct FocusableTextField: NSViewRepresentable {
 
     func controlTextDidChange(_ obj: Notification) {
       guard let textField = obj.object as? NSTextField else { return }
+
+      // limit input
+      if textField.stringValue.count > MAX_INPUT_LIMIT {
+        textField.stringValue = String(textField.stringValue.prefix(MAX_INPUT_LIMIT))
+        NSSound.beep()
+      }
+
       parent.text = textField.stringValue
     }
 
@@ -141,7 +149,7 @@ struct GlassmorphismSearchField: View {
   var body: some View {
     HStack(spacing: 10) {
       Image(systemName: "magnifyingglass")
-        .foregroundColor(.white.opacity(0.7))
+        .foregroundColor(.white.opacity(0.8))
         .font(.system(size: 15, weight: .medium))
 
       FocusableTextField(
@@ -187,7 +195,7 @@ struct GlassmorphismSearchField: View {
       }
     )
     .clipShape(RoundedRectangle(cornerRadius: 12))
-    .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+    .shadow(color: .black.opacity(0.4), radius: 8, x: 0, y: 4)
   }
 }
 
@@ -334,10 +342,10 @@ class GlassmorphismSearchCoordinator: NSObject {
     }
 
     switch event.keyCode {
-    case 125, 124:  // Down arrow, Right arrow
+    case 125:  // Down arrow
       onMoveDown?()
       return true
-    case 126, 123:  // Up arrow, Left arrow
+    case 126:  // Up arrow
       onMoveUp?()
       return true
     case 36:  // Enter/Return
