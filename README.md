@@ -7,14 +7,14 @@ A modern, customizable(in the future) application switcher for macOS that enhanc
 # Table of contents
 
 - [CmdTab](#cmdtab)
-  - [1. Demo](#1.-demo)
-  - [2. Features](#2.-features)
-  - [3. Installation](#3.-installation)
+  - [1. Demo](#1-demo)
+  - [2. Features](#2-features)
+  - [3. Installation](#3-installation)
     - [3.1 Download From Release](#3.1-download-from-release)
     - [3.2 Homebrew](#3.2-homebrew)
-  - [4. Usage](#4.-usage)
-  - [5. Requirements](#5.-requirements)
-  - [6. License](#6.-license)
+  - [4. Usage](#4-usage)
+  - [5. Requirements](#5-requirements)
+  - [6. License](#6-license)
 
 ## 1. Demo
 
@@ -31,7 +31,7 @@ A modern, customizable(in the future) application switcher for macOS that enhanc
 
 ## 3. Installation
 
-### 3.1 Download From Release
+### 3.1. Download From Release
 
 Download the latest version from the [Release Page](https://github.com/sshelll/CmdTab/releases).
 
@@ -42,7 +42,7 @@ Download the latest version from the [Release Page](https://github.com/sshelll/C
    - Go to System Settings > Privacy & Security, find the message about CmdTab being blocked, and click "Open Anyway"
 5. Grant necessary permissions when prompted (Accessibility permissions are required for the app to function properly)
 
-### 3.2 Homebrew
+### 3.2. Homebrew
 
 ```sh
 brew tap sshelll/tap git@github.com:sshelll/homebrew-tap.git
