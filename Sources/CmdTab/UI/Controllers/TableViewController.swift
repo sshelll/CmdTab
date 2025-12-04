@@ -7,6 +7,7 @@ protocol TableViewControllerDelegate: AnyObject {
   func didRequestSearchMode()
 }
 
+@available(macOS 13.0, *)
 @MainActor
 class TableViewController:
   NSObject,
@@ -101,11 +102,12 @@ class TableViewController:
   // MARK: - Private Methods
 
   private func createWindowRowView(for searchResult: WindowSearchResult) -> NSStackView {
+    let highlightColor: NSColor = isDarkMode() ? .systemYellow : .controlAccentColor
     let window = searchResult.window
     let iconView = createIconView(for: window)
-    let appView = createAppNameView(for: searchResult)
+    let appView = createAppNameView(for: searchResult, hi: highlightColor)
     let separatorView = createSeparatorView()
-    let titleView = createAppTitleView(for: searchResult)
+    let titleView = createAppTitleView(for: searchResult, hi: highlightColor)
 
     let stackView = NSStackView()
     stackView.orientation = .horizontal
@@ -134,7 +136,7 @@ class TableViewController:
     return iconView
   }
 
-  private func createAppNameView(for searchResult: WindowSearchResult) -> NSTextField {
+  private func createAppNameView(for searchResult: WindowSearchResult, hi: NSColor) -> NSTextField {
     let appView = NSTextField()
 
     appView.attributedStringValue = createHighlightedTextWithIndices(
@@ -143,7 +145,7 @@ class TableViewController:
       font: .systemFont(ofSize: 16),
       textColor: .labelColor,
       // TODO: customized theme
-      highlightColor: .systemYellow
+      highlightColor: hi,
     )
     appView.isEditable = false
     appView.isBordered = false
@@ -164,7 +166,8 @@ class TableViewController:
     return separatorView
   }
 
-  private func createAppTitleView(for searchResult: WindowSearchResult) -> NSTextField {
+  private func createAppTitleView(for searchResult: WindowSearchResult, hi: NSColor) -> NSTextField
+  {
     let titleView = NSTextField()
 
     titleView.attributedStringValue = createHighlightedTextWithIndices(
@@ -173,7 +176,7 @@ class TableViewController:
       font: .systemFont(ofSize: 16),
       textColor: .labelColor,
       // TODO: customized theme
-      highlightColor: .systemYellow
+      highlightColor: hi,
     )
     titleView.isEditable = false
     titleView.isBordered = false

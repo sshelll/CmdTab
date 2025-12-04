@@ -2,7 +2,7 @@ APP_NAME := CmdTab
 BUNDLE_ID := com.sshelll.cmdtab
 VERSION := 1.0.0
 
-.PHONY: all dmg app build gen_icon clean run debug sha256
+.PHONY: all dmg app build gen_icon pack_icon clean run debug sha256
 all: dmg
 
 run:
@@ -58,7 +58,7 @@ app: build
 	@codesign --deep --force --sign - $(APP_NAME).app
 	@echo "✅ App bundle created: $(APP_NAME).app"
 
-dmg: clean gen_icon app
+dmg: clean pack_icon app
 	@echo "📦 Creating DMG..."
 	@create-dmg \
 	  --volname "$(APP_NAME) Installer" \
@@ -66,7 +66,7 @@ dmg: clean gen_icon app
 	  --background "artifacts/dmg_background.png" \
 	  --window-pos 400 100 \
 	  --window-size 600 400 \
-	  --icon-size 100 \
+	  --icon-size 128 \
 	  --icon "$(APP_NAME).app" 150 200 \
 	  --hide-extension "$(APP_NAME).app" \
 	  --app-drop-link 450 200 \
@@ -92,10 +92,12 @@ gen_icon:
 	@sips -z 512 512 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_512x512.png
 	@sips -z 1024 1024 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_512x512@2x.png
 	@iconutil -c icns artifacts/AppIcon.iconset
-	@rm -rf artifacts/AppIcon.iconset
+
+pack_icon:
+	@iconutil -c icns artifacts/AppIcon.iconset
 
 clean:
 	@echo "🧹 Cleaning..."
-	@-rm artifacts/AppIcon.icns
 	@-rm -rf CmdTab.app
 	@-rm -rf *.dmg
+	@-rm -rf artifacts/AppIcon.icns

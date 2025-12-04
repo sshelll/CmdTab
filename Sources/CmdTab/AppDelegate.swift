@@ -1,6 +1,6 @@
 import Cocoa
 
-@available(macOS 12.0, *)
+@available(macOS 13.0, *)
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   private var mainViewController: MainViewController?
@@ -80,6 +80,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
     if let runLoopSource = runLoopSource {
       CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
       CGEvent.tapEnable(tap: eventTap!, enable: true)
+    } else {
+      AlertCritical(
+        msgText: "Register HotKey failed",
+        informativeText: "CmdTab cannot register ⌘+Tab hotkey, will terminate immediately",
+      )
     }
   }
 }

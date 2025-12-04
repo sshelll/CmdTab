@@ -8,3 +8,9 @@ func checkAccessibilityPermissions() -> Bool {
 
   return AXIsProcessTrustedWithOptions(options as CFDictionary)
 }
+
+@MainActor
+@available(macOS 13.0, *)
+func isDarkMode() -> Bool {
+  return NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+}

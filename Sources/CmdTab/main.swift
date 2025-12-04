@@ -1,6 +1,6 @@
 import Cocoa
 
-@available(macOS 12.0, *)
+@available(macOS 13.0, *)
 @MainActor
 func main() {
   // Check accessibility permissions first
@@ -21,8 +21,12 @@ func main() {
   app.run()
 }
 
-if #available(macOS 12.0, *) {
+if #available(macOS 13.0, *) {
   main()
 } else {
-  abort()
+  AlertCritical(
+    msgText: "Unsupported macOS Version",
+    informativeText:
+      "This application requires macOS 13.0 or later. Please upgrade your system to use this app.",
+  )
 }

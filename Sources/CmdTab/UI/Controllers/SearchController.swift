@@ -1,6 +1,6 @@
 import Cocoa
 
-@available(macOS 12.0, *)
+@available(macOS 13.0, *)
 @MainActor
 class SearchController: NSObject {
   private let dataManager: DataManager

@@ -1,5 +1,8 @@
+// WindowManager.swift
 import Cocoa
+import SwiftUI
 
+@available(macOS 13.0, *)
 @MainActor
 class WindowManager: WindowDelegate {
   private var window: Window?
@@ -15,13 +18,11 @@ class WindowManager: WindowDelegate {
       styleMask: [.fullSizeContentView],
       backing: .buffered,
       defer_: false,
-      windowDelegate: self,
+      windowDelegate: self
     )
 
     configureWindow(newWindow)
-
     self.window = newWindow
-
     return newWindow
   }
 
@@ -34,12 +35,9 @@ class WindowManager: WindowDelegate {
     // always display on main screen
     if let mainScreen = NSScreen.screens.first {
       let visibleFrame = mainScreen.visibleFrame
-
       let windowSize = window.frame.size
-
       let x = (visibleFrame.width - windowSize.width) / 2 + visibleFrame.origin.x
       let y = (visibleFrame.height - windowSize.height) / 2 + visibleFrame.origin.y
-
       let newFrame = CGRect(x: x, y: y, width: windowSize.width, height: windowSize.height)
       window.setFrame(newFrame, display: true)
     }
@@ -66,31 +64,25 @@ class WindowManager: WindowDelegate {
     window.styleMask = [.titled, .fullSizeContentView]
     window.titleVisibility = .hidden
     window.titlebarAppearsTransparent = true
-
     window.isOpaque = false
     window.backgroundColor = .clear
     window.hasShadow = true
 
-    let contentView = createContentView(for: window)
-    window.contentView = contentView
+    // Use SwiftUI-based content view
+    window.contentView = createSwiftUIContentView(for: window)
   }
 
-  private func createContentView(for window: Window) -> NSVisualEffectView {
-    let contentView = NSVisualEffectView(frame: window.contentView!.bounds)
-    contentView.blendingMode = .behindWindow
+  private func createSwiftUIContentView(for window: Window) -> NSView {
+    // Create a container view that will hold actual content
+    let contentView = NSView(frame: window.contentView!.bounds)
     contentView.autoresizingMask = [.width, .height]
-    // TODO: customized theme
-    // contentView.appearance = NSAppearance(named: .vibrantLight)
-    if #available(macOS 10.14, *) {
-      contentView.material = .hudWindow
-    } else {
-      contentView.material = .sidebar
-    }
-    contentView.state = .active
-    contentView.wantsLayer = true
-    contentView.layer?.cornerRadius = 18
-    contentView.layer?.masksToBounds = true
-    contentView.layer?.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+
+    // Create SwiftUI background view
+    let hostingView = NSHostingView(rootView: GlassmorphismWindowContentView())
+    hostingView.frame = contentView.bounds
+    hostingView.autoresizingMask = [.width, .height]
+
+    contentView.addSubview(hostingView)
 
     return contentView
   }

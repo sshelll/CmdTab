@@ -22,7 +22,9 @@ A modern, customizable(in the future) application switcher for macOS that enhanc
 
 ## 2. Features
 
-- 🎨 **Modern UI** - Beautiful glassmorphism design with smooth animations
+- 🎨 **Modern UI** - Beautiful design with smooth animations
+  - glassmorphism for users under macOS 26
+  - liquid glass for users above macOS 26
 - 🔍 **Quick Search** - Press 'i', '/', or 'a' to search applications instantly
 - ⌨️ **Keyboard Navigation** - Navigate with arrow keys, Tab, Shift+Tab, or Vim Keys(h,j,k,l)
 - 🖱️ **Mouse Support** - Click to switch applications directly
@@ -49,6 +51,12 @@ brew tap sshelll/tap git@github.com:sshelll/homebrew-tap.git
 brew install --cask sshelll/tap/cmdtab
 ```
 
+### 3.3 Upgrading
+
+For upgrading, you need to install the latest `.dmg`.
+
+**Important**: After installation, when you open CmdTab, you have to grant the permissions in step 5 again. And when you're doing this, you need to remove the old grant and add the new one manually: click the '-' to remove the old grant in Accessibility settings, then click the '+' to add the new one.
+
 And then follow the step 4 and 5 above to allow and grant permissions.
 
 ## 4. Usage
@@ -61,7 +69,7 @@ And then follow the step 4 and 5 above to allow and grant permissions.
 
 ## 5. Requirements
 
-- macOS 12.0 or later
+- macOS 13.0 or later
 
 ## 6. License
 
