@@ -6,6 +6,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   private var mainViewController: MainViewController?
   private var statusController: StatusController!
 
+  // NOTE: reserve these two vars to avoid GC and cause our hotkey not work
+  private var eventTap: CFMachPort?
+  private var runLoopSource: CFRunLoopSource?
+
   // MARK: -- NSApplicationDelegate
 
   func applicationDidFinishLaunching(_ notification: Notification) {
@@ -16,6 +20,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
 
   func applicationWillTerminate(_ notification: Notification) {
     mainViewController?.cleanup()
+    if let eventTap = eventTap {
+      CGEvent.tapEnable(tap: eventTap, enable: false)
+    }
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -47,7 +54,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
 
   private func setupGlobalHotkey() {
     let eventMask = (1 << CGEventType.keyDown.rawValue)
-    let eventTap = CGEvent.tapCreate(
+    self.eventTap = CGEvent.tapCreate(
       tap: .cgSessionEventTap,
       place: .headInsertEventTap,
       options: .defaultTap,
@@ -69,8 +76,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
       userInfo: nil
     )
 
-    let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
-    CGEvent.tapEnable(tap: eventTap!, enable: true)
+    self.runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, self.eventTap, 0)
+    if let runLoopSource = runLoopSource {
+      CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+      CGEvent.tapEnable(tap: eventTap!, enable: true)
+    }
   }
 }
