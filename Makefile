@@ -66,7 +66,7 @@ dmg: clean pack_icon app
 	  --background "artifacts/dmg_background.png" \
 	  --window-pos 400 100 \
 	  --window-size 600 400 \
-	  --icon-size 128 \
+	  --icon-size 100 \
 	  --icon "$(APP_NAME).app" 150 200 \
 	  --hide-extension "$(APP_NAME).app" \
 	  --app-drop-link 450 200 \
@@ -81,23 +81,23 @@ sha256:
 gen_icon:
 	@echo "🎨 Generating icon..."
 	@mkdir artifacts/AppIcon.iconset
-	@sips -z 16 16 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_16x16.png
-	@sips -z 32 32 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_16x16@2x.png
-	@sips -z 32 32 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_32x32.png
-	@sips -z 64 64 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_32x32@2x.png
-	@sips -z 128 128 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_128x128.png
-	@sips -z 256 256 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_128x128@2x.png
-	@sips -z 256 256 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_256x256.png
-	@sips -z 512 512 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_256x256@2x.png
-	@sips -z 512 512 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_512x512.png
-	@sips -z 1024 1024 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_512x512@2x.png
-	@iconutil -c icns artifacts/AppIcon.iconset
+	@sips -i -z 16 16 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_16x16.png
+	@sips -i -z 32 32 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_16x16@2x.png
+	@sips -i -z 32 32 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_32x32.png
+	@sips -i -z 64 64 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_32x32@2x.png
+	@sips -i -z 128 128 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_128x128.png
+	@sips -i -z 256 256 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_128x128@2x.png
+	@sips -i -z 256 256 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_256x256.png
+	@sips -i -z 512 512 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_256x256@2x.png
+	@sips -i -z 512 512 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_512x512.png
+	@sips -i -z 1024 1024 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_512x512@2x.png
 
-pack_icon:
+pack_icon: gen_icon
 	@iconutil -c icns artifacts/AppIcon.iconset
 
 clean:
 	@echo "🧹 Cleaning..."
 	@-rm -rf CmdTab.app
 	@-rm -rf *.dmg
+	@-rm -rf artifacts/AppIcon.iconset
 	@-rm -rf artifacts/AppIcon.icns
