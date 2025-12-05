@@ -83,8 +83,23 @@ gen_icon:
 	@mkdir artifacts/AppIcon.iconset
 	@sips -i -z 16 16 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_16x16.png
 	@sips -i -z 32 32 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_16x16@2x.png
+	@sips -i -z 40 40 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_20x20@2x.png
+	@sips -i -z 60 60 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_20x20@3x.png
+	@sips -i -z 58 58 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_29x29@2x.png
+	@sips -i -z 87 87 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_29x29@3x.png
 	@sips -i -z 32 32 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_32x32.png
 	@sips -i -z 64 64 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_32x32@2x.png
+	@sips -i -z 76 76 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_38x38@2x.png
+	@sips -i -z 114 114 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_38x38@3x.png
+	@sips -i -z 80 80 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_40x40@2x.png
+	@sips -i -z 120 120 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_40x40@3x.png
+	@sips -i -z 120 120 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_60x60@2x.png
+	@sips -i -z 180 180 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_60x60@3x.png
+	@sips -i -z 128 128 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_64x64@2x.png
+	@sips -i -z 192 192 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_64x64.png
+	@sips -i -z 136 136 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_68x68@2x.png
+	@sips -i -z 152 152 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_76x76@2x.png
+	@sips -i -z 167 167 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_83.5x83.5@2x.png
 	@sips -i -z 128 128 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_128x128.png
 	@sips -i -z 256 256 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_128x128@2x.png
 	@sips -i -z 256 256 artifacts/icon.png --out artifacts/AppIcon.iconset/icon_256x256.png

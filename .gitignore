@@ -10,3 +10,4 @@ nohup.out
 *.dmg
 *.app
 artifacts/*.icns
+artifacts/*.iconset
