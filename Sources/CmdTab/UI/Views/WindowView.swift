@@ -11,6 +11,8 @@ struct GlassmorphismWindowContentView: View {
           .glassEffect(
             // .clear.tint(Color(red: 255 / 255, green: 208 / 255, blue: 191 / 255)).interactive(),
             .regular.interactive(),
+            // .clear.interactive(),
+            // .identity.interactive(),
             in: RoundedRectangle(cornerRadius: 18)
           )
           .ignoresSafeArea()

@@ -102,12 +102,16 @@ class TableViewController:
   // MARK: - Private Methods
 
   private func createWindowRowView(for searchResult: WindowSearchResult) -> NSStackView {
-    let highlightColor: NSColor = isDarkMode() ? .systemYellow : .controlAccentColor
+    let isDark = isDarkMode()
+    let sepColor: NSColor = isDark ? .secondaryLabelColor : .black
+    let textColor: NSColor = isDark ? .labelColor : .black
+    let highlightColor: NSColor = isDark ? .systemYellow : .controlAccentColor
+
     let window = searchResult.window
     let iconView = createIconView(for: window)
-    let appView = createAppNameView(for: searchResult, hi: highlightColor)
-    let separatorView = createSeparatorView()
-    let titleView = createAppTitleView(for: searchResult, hi: highlightColor)
+    let appView = createAppNameView(for: searchResult, textColor: textColor, hi: highlightColor)
+    let separatorView = createSeparatorView(color: sepColor)
+    let titleView = createAppTitleView(for: searchResult, textColor: textColor, hi: highlightColor)
 
     let stackView = NSStackView()
     stackView.orientation = .horizontal
@@ -136,14 +140,17 @@ class TableViewController:
     return iconView
   }
 
-  private func createAppNameView(for searchResult: WindowSearchResult, hi: NSColor) -> NSTextField {
+  private func createAppNameView(
+    for searchResult: WindowSearchResult,
+    textColor: NSColor, hi: NSColor
+  ) -> NSTextField {
     let appView = NSTextField()
 
     appView.attributedStringValue = createHighlightedTextWithIndices(
       text: searchResult.window.appName,
       matchIndices: searchResult.appNameMatches,
       font: .systemFont(ofSize: 16),
-      textColor: .labelColor,
+      textColor: textColor,
       // TODO: customized theme
       highlightColor: hi,
     )
@@ -156,25 +163,27 @@ class TableViewController:
     return appView
   }
 
-  private func createSeparatorView() -> NSTextField {
+  private func createSeparatorView(color textColor: NSColor) -> NSTextField {
     let separatorView = NSTextField(labelWithString: " - ")
     separatorView.font = .systemFont(ofSize: 16)
-    separatorView.textColor = .secondaryLabelColor
+    separatorView.textColor = textColor
     separatorView.translatesAutoresizingMaskIntoConstraints = false
     separatorView.setContentHuggingPriority(.required, for: .horizontal)
 
     return separatorView
   }
 
-  private func createAppTitleView(for searchResult: WindowSearchResult, hi: NSColor) -> NSTextField
-  {
+  private func createAppTitleView(
+    for searchResult: WindowSearchResult,
+    textColor: NSColor, hi: NSColor
+  ) -> NSTextField {
     let titleView = NSTextField()
 
     titleView.attributedStringValue = createHighlightedTextWithIndices(
       text: searchResult.window.windowTitle,
       matchIndices: searchResult.titleMatches,
       font: .systemFont(ofSize: 16),
-      textColor: .labelColor,
+      textColor: textColor,
       // TODO: customized theme
       highlightColor: hi,
     )
