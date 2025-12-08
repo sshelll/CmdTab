@@ -20,6 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
 
   func applicationWillTerminate(_ notification: Notification) {
     mainViewController?.cleanup()
+    statusController.cleanup()
     if let eventTap = eventTap {
       CGEvent.tapEnable(tap: eventTap, enable: false)
     }
@@ -53,27 +54,32 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   }
 
   private func setupGlobalHotkey() {
+    let selfPointer = Unmanaged.passUnretained(self).toOpaque()
     let eventMask = (1 << CGEventType.keyDown.rawValue)
+
     self.eventTap = CGEvent.tapCreate(
       tap: .cgSessionEventTap,
       place: .headInsertEventTap,
       options: .defaultTap,
       eventsOfInterest: CGEventMask(eventMask),
       callback: { proxy, type, event, refcon in
+        guard let refcon = refcon else {
+          return Unmanaged.passUnretained(event)
+        }
+        let appDelegate = Unmanaged<AppDelegate>.fromOpaque(refcon).takeUnretainedValue()
+
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let flags = event.flags
         if keyCode == 48 && flags.contains(.maskCommand) {
-          DispatchQueue.main.async {
-            if let appDelegate = NSApp.delegate as? AppDelegate {
-              appDelegate.didRequestShowMainWindow()
-            }
-          }
-          return nil  // prevent sending to sys
-          // return Unmanaged.passUnretained(event)  // still pass to sys
+          appDelegate.didRequestShowMainWindow()
+          // prevent sending to sys
+          return nil
         }
+
+        // still pass to sys
         return Unmanaged.passUnretained(event)
       },
-      userInfo: nil
+      userInfo: selfPointer
     )
 
     self.runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, self.eventTap, 0)

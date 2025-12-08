@@ -1,7 +1,7 @@
 import Cocoa
 
 @MainActor
-protocol WindowDelegate {
+protocol WindowDelegate: AnyObject {
   func onResignKey()
 }
 
@@ -9,10 +9,10 @@ class Window: NSWindow {
   override var canBecomeKey: Bool { true }
   override var canBecomeMain: Bool { true }
 
-  var windowDelegate: WindowDelegate
+  weak var windowDelegate: WindowDelegate?
 
   override func resignKey() {
-    windowDelegate.onResignKey()
+    windowDelegate?.onResignKey()
   }
 
   init(

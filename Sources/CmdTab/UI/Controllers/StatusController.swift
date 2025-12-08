@@ -15,6 +15,10 @@ class StatusController {
     setupStatusItem()
   }
 
+  func cleanup() {
+    NSStatusBar.system.removeStatusItem(statusItem)
+  }
+
   private func setupStatusItem() {
     // create status bar item
     statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -47,5 +51,4 @@ class StatusController {
     print("StatusController: quit() method called")
     delegate?.didRequestQuit()
   }
-
 }
