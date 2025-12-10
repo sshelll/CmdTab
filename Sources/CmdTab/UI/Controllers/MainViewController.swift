@@ -4,7 +4,8 @@ import Cocoa
 @MainActor
 class MainViewController:
   DataManagerDelegate,
-  TableViewControllerDelegate
+  TableViewControllerDelegate,
+  WindowManagerDelegate
 {
   private let appOrderManager: AppOrderManager
   private let dataManager: DataManager
@@ -14,9 +15,10 @@ class MainViewController:
   private let tableViewController: TableViewController
   private let searchController: SearchController
 
-  // 替换为 SwiftUI 搜索框协调器
   private var searchCoordinator: GlassmorphismSearchCoordinator!
   private var tableView: VimTableView!
+
+  private var isWindowActive = false
 
   init() {
     self.appOrderManager = AppOrderManager()
@@ -33,6 +35,7 @@ class MainViewController:
     // Set up delegation
     self.dataManager.delegate = self
     self.tableViewController.delegate = self
+    self.windowManager.delegate = self
   }
 
   func setupMainWindow() {
@@ -46,16 +49,26 @@ class MainViewController:
   }
 
   func showWindow() {
+    if self.isWindowActive {
+      return
+    }
     dataManager.reloadSwitchableWindows()
     searchController.clearSearch()
     windowManager.showWindow()
     windowManager.getWindow()?.makeFirstResponder(tableView)
+    self.isWindowActive = true
+  }
+
+  // MARK: - WindowManagerDelegate
+  func afterHideWindow() {
+    self.isWindowActive = false
   }
 
   // MARK: - SearchControllerDelegate + TableViewControllerDelegate
 
   func didRequestClose() {
     windowManager.hideWindow()
+    self.isWindowActive = false
   }
 
   func didRequestSwitch() {

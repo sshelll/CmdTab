@@ -55,7 +55,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
 
   private func setupGlobalHotkey() {
     let selfPointer = Unmanaged.passUnretained(self).toOpaque()
-    let eventMask = (1 << CGEventType.keyDown.rawValue)
+    let eventMask =
+      (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.tapDisabledByTimeout.rawValue)
+      | (1 << CGEventType.tapDisabledByUserInput.rawValue)
 
     self.eventTap = CGEvent.tapCreate(
       tap: .cgSessionEventTap,
@@ -68,16 +70,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
         }
         let appDelegate = Unmanaged<AppDelegate>.fromOpaque(refcon).takeUnretainedValue()
 
-        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-        let flags = event.flags
-        if keyCode == 48 && flags.contains(.maskCommand) {
-          appDelegate.didRequestShowMainWindow()
-          // prevent sending to sys
-          return nil
-        }
+        switch type {
+        // when event tap is disabled, enable it again
+        case .tapDisabledByTimeout, .tapDisabledByUserInput:
+          NSLog("[CmdTab] Event tap disabled (type: \(type)), re-enabling...")
+          if let tap = appDelegate.eventTap {
+            CGEvent.tapEnable(tap: tap, enable: true)
+          }
+          return Unmanaged.passUnretained(event)
 
-        // still pass to sys
-        return Unmanaged.passUnretained(event)
+        // keyboard event
+        case .keyDown:
+          let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+          let flags = event.flags
+          if keyCode == 48 && flags.contains(.maskCommand) {
+            appDelegate.didRequestShowMainWindow()
+            // prevent sending to sys
+            return nil
+          }
+          // still pass to sys
+          return Unmanaged.passUnretained(event)
+
+        // unrecognized event
+        default:
+          return Unmanaged.passUnretained(event)
+        }
       },
       userInfo: selfPointer
     )

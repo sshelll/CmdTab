@@ -2,10 +2,16 @@
 import Cocoa
 import SwiftUI
 
+@MainActor
+protocol WindowManagerDelegate: AnyObject {
+  func afterHideWindow()
+}
+
 @available(macOS 13.0, *)
 @MainActor
 class WindowManager: WindowDelegate {
   private var window: Window?
+  weak var delegate: WindowManagerDelegate?
 
   // MARK: -- public funcs
 
@@ -47,6 +53,7 @@ class WindowManager: WindowDelegate {
 
   func hideWindow() {
     window?.orderOut(nil)
+    delegate?.afterHideWindow()
   }
 
   func getWindow() -> Window? {
