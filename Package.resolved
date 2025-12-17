@@ -1,5 +1,5 @@
 {
-  "originHash" : "7066c08fa813052cac1d6c20cb78d91519958cf41351077b130c7db7f69e478f",
+  "originHash" : "2434cf0da752c03b2bf9699916d7fcc771cb73c9f8837ceaf39e3b7ea70891a4",
   "pins" : [
     {
       "identity" : "fuse-swift",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "26ba868691b2d8b7bf2b1322951eb591be70ccca",
         "version" : "1.4.0"
+      }
+    },
+    {
+      "identity" : "hotkey",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/soffes/HotKey",
+      "state" : {
+        "revision" : "a3cf605d7a96f6ff50e04fcb6dea6e2613cfcbe4",
+        "version" : "0.2.1"
       }
     }
   ],

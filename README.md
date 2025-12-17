@@ -61,7 +61,7 @@ And then follow the step 4 and 5 above to allow and grant permissions.
 
 ## 4. Usage
 
-- Press `Cmd+Tab` to open the application switcher
+- Press `Command+Tab` or `Option+Tab` to open the application switcher
 - Use arrow keys or Tab to navigate between applications
 - Press 'i', '/', or 'a' to activate search mode
 - Press Enter to switch to the selected application
@@ -74,3 +74,8 @@ And then follow the step 4 and 5 above to allow and grant permissions.
 ## 6. License
 
 MIT License
+
+## 7. Known Issues
+
+- `Command+Tab` hotkey doesn't work after running for a while
+  This is because `Command+Tab` is a mac os builtin shortcut and cannot be disabled in System Settings, so we're doing this in a hack way which is unstable, but `Option+Tab` should always work fine.

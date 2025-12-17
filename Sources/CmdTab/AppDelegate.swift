@@ -1,4 +1,5 @@
 import Cocoa
+import HotKey
 
 @available(macOS 13.0, *)
 @MainActor
@@ -10,11 +11,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   private var eventTap: CFMachPort?
   private var runLoopSource: CFRunLoopSource?
 
+  private var hotkey: HotKey?
+
   // MARK: -- NSApplicationDelegate
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     setupApplication()
-    setupGlobalHotkey()
+    setupGlobalHotkeyUnstable()
+    setupGlobalHotKeyV2()
     NSApplication.shared.setActivationPolicy(.accessory)
   }
 
@@ -33,8 +37,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   // MARK: -- StatusControllerDelegate + Hotkey
 
   func didRequestShowMainWindow() {
-    NSApp.activate(ignoringOtherApps: true)
-    mainViewController?.showWindow()
+    DispatchQueue.main.async {
+      NSApp.activate(ignoringOtherApps: true)
+      self.mainViewController?.showWindow()
+    }
   }
 
   func didRequestQuit() {
@@ -53,7 +59,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
     mainViewController?.setupMainWindow()
   }
 
-  private func setupGlobalHotkey() {
+  private func setupGlobalHotKeyV2() {
+    self.hotkey = HotKey(key: .tab, modifiers: [.option])
+    self.hotkey!.keyDownHandler = {
+      self.didRequestShowMainWindow()
+    }
+  }
+
+  // cmd-tab is a mac os builtin shortcut which cannot be disabled
+  private func setupGlobalHotkeyUnstable() {
     let selfPointer = Unmanaged.passUnretained(self).toOpaque()
     let eventMask =
       (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.tapDisabledByTimeout.rawValue)
