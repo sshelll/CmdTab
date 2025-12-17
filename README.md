@@ -77,5 +77,6 @@ MIT License
 
 ## 7. Known Issues
 
-- `Command+Tab` hotkey doesn't work after running for a while
+- `Command+Tab` hotkey doesn't work after running for a while.
+
   This is because `Command+Tab` is a mac os builtin shortcut and cannot be disabled in System Settings, so we're doing this in a hack way which is unstable, but `Option+Tab` should always work fine.
