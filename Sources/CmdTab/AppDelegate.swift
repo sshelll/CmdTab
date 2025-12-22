@@ -37,10 +37,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
   // MARK: -- StatusControllerDelegate + Hotkey
 
   func didRequestShowMainWindow() {
-    DispatchQueue.main.async {
-      NSApp.activate(ignoringOtherApps: true)
-      self.mainViewController?.showWindow()
-    }
+    NSApp.activate(ignoringOtherApps: true)
+    self.mainViewController?.showWindow()
   }
 
   func didRequestQuit() {
@@ -98,7 +96,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, StatusControllerDelegate {
           let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
           let flags = event.flags
           if keyCode == 48 && flags.contains(.maskCommand) {
-            appDelegate.didRequestShowMainWindow()
+            DispatchQueue.main.async {
+              appDelegate.didRequestShowMainWindow()
+            }
             // prevent sending to sys
             return nil
           }
