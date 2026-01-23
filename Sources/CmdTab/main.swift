@@ -17,7 +17,7 @@ func main() {
 
   // Configure and run the application
   app.delegate = delegate
-  app.setActivationPolicy(.regular)
+  app.setActivationPolicy(.accessory)
   app.run()
 }
 

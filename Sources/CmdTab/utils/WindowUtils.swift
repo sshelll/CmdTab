@@ -111,21 +111,29 @@ extension NSRunningApplication {
         windowTitle: title,
         icon: self.icon,
         activateFn: {
-          // has window, activate it
           if let windowElement = win {
-            // before activate the window, put it to front
-            AXUIElementPerformAction(windowElement, kAXRaiseAction as CFString)
-            self.activate()
-            return
+            var role: CFTypeRef?
+            if AXUIElementCopyAttributeValue(
+              windowElement,
+              kAXRoleAttribute as CFString,
+              &role
+            ) == .success {
+              AXUIElementPerformAction(windowElement, kAXRaiseAction as CFString)
+              self.activate(options: [.activateIgnoringOtherApps])
+              return
+            }
           }
 
-          // no window, launch it
-          NSWorkspace.shared.launchApplication(
-            withBundleIdentifier: self.bundleIdentifier ?? "",
-            options: [.default],
-            additionalEventParamDescriptor: nil,
-            launchIdentifier: nil
-          )
+          if !self.isTerminated {
+            self.activate(options: [.activateIgnoringOtherApps])
+          } else if let bundleId = self.bundleIdentifier {
+            NSWorkspace.shared.launchApplication(
+              withBundleIdentifier: bundleId,
+              options: [.default],
+              additionalEventParamDescriptor: nil,
+              launchIdentifier: nil
+            )
+          }
         }
       )
   }
