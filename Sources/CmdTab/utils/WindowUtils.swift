@@ -91,48 +91,87 @@ extension NSRunningApplication {
   }
 
   func filterAXWindowsByAttrs(win: AXUIElement) -> Bool {
+    // Check if window is hidden - if hidden attribute is true (1), filter it out
     var hidden: AnyObject?
-    AXUIElementCopyAttributeValue(
+    let hiddenResult = AXUIElementCopyAttributeValue(
       win,
       kAXHiddenAttribute as CFString,
       &hidden
     )
-    if let h = hidden as? Int, h == 0 {
+
+    // If we can get the hidden attribute and it's true (1), filter out this window
+    if hiddenResult == .success, let h = hidden as? Bool, h {
       return false
     }
+
+    // Check if window is minimized - filter out minimized windows
+    var minimized: AnyObject?
+    let minimizedResult = AXUIElementCopyAttributeValue(
+      win,
+      kAXMinimizedAttribute as CFString,
+      &minimized
+    )
+
+    if minimizedResult == .success, let m = minimized as? Bool, m {
+      return false
+    }
+
     return true
   }
 
   func intoSwitchableWindow(_ title: String, win: AXUIElement?) -> SwitchableWindow {
+    // Capture necessary values to ensure they are available when the closure executes
+    let bundleId = self.bundleIdentifier
+    let appPid = self.processIdentifier
+
     return
       SwitchableWindow(
         appName: self.getAppUnlocalizedName() ?? self.localizedName ?? UNKNOWN_APP,
-        pid: self.processIdentifier,
+        pid: appPid,
         windowTitle: title,
         icon: self.icon,
         activateFn: {
-          if let windowElement = win {
-            var role: CFTypeRef?
-            if AXUIElementCopyAttributeValue(
-              windowElement,
-              kAXRoleAttribute as CFString,
-              &role
-            ) == .success {
-              AXUIElementPerformAction(windowElement, kAXRaiseAction as CFString)
-              self.activate(options: [.activateIgnoringOtherApps])
-              return
-            }
+          // Safety check: Verify the application is still running
+          // This prevents issues when the closure is called after the app has terminated
+          guard !self.isTerminated else {
+            print("Warning: Cannot activate terminated app (pid \(appPid))")
+            return
           }
 
-          if !self.isTerminated {
-            self.activate(options: [.activateIgnoringOtherApps])
-          } else if let bundleId = self.bundleIdentifier {
-            NSWorkspace.shared.launchApplication(
-              withBundleIdentifier: bundleId,
-              options: [.default],
-              additionalEventParamDescriptor: nil,
-              launchIdentifier: nil
-            )
+          // has window, activate it
+          if let windowElement = win {
+            // before activate the window, put it to front
+            let raiseResult = AXUIElementPerformAction(windowElement, kAXRaiseAction as CFString)
+
+            // Even if raise fails, still try to activate the app
+            if raiseResult != .success {
+              print(
+                "Warning: Failed to raise window for pid \(appPid), error: \(raiseResult.rawValue)")
+            }
+
+            // Activate the application with options to bring it to front
+            let activated = self.activate(options: [.activateIgnoringOtherApps])
+            if !activated {
+              print("Warning: Failed to activate app for pid \(appPid)")
+            }
+            return
+          }
+
+          // no window, launch it
+          guard let bundleIdentifier = bundleId, !bundleIdentifier.isEmpty else {
+            print("Error: Cannot launch app - bundle identifier is missing for pid \(appPid)")
+            return
+          }
+
+          let launched = NSWorkspace.shared.launchApplication(
+            withBundleIdentifier: bundleIdentifier,
+            options: [.default],
+            additionalEventParamDescriptor: nil,
+            launchIdentifier: nil
+          )
+
+          if !launched {
+            print("Error: Failed to launch app with bundle identifier: \(bundleIdentifier)")
           }
         }
       )
