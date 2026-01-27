@@ -8,7 +8,7 @@ class AppOrderManager {
   /// Node in the doubly linked list
   private class Node {
     let pid: pid_t
-    var prev: Node?
+    weak var prev: Node?
     var next: Node?
 
     init(pid: pid_t) {
@@ -37,19 +37,45 @@ class AppOrderManager {
   }
 
   /// Initialize the order with currently running applications
+  /// Only adds the frontmost app and a limited number of recent apps
   private func initializeWithRunningApps() {
     let runningApps = NSWorkspace.shared.runningApplications
 
-    // Filter out system apps and add regular apps to the order
+    // First, add the currently active app (frontmost)
+    if let frontApp = NSWorkspace.shared.frontmostApplication,
+      frontApp.activationPolicy == .regular
+    {
+      addToHead(pid: frontApp.processIdentifier)
+    }
+
+    // Then add other regular apps (up to a reasonable limit)
+    // Note: The order here is arbitrary since we don't have activation history
+    // Real order will be established as user switches between apps
+    var addedCount = count
     for app in runningApps {
-      if app.activationPolicy == .regular {
+      // Skip if already added or not a regular app
+      if app.activationPolicy == .regular && pidToNode[app.processIdentifier] == nil {
         addToHead(pid: app.processIdentifier)
+        addedCount += 1
+
+        // Limit initial apps to avoid excessive memory usage
+        // Leave room for new apps that will be activated
+        if addedCount >= maxPidsToTrack / 2 {
+          break
+        }
       }
     }
   }
 
   /// Adds a node to the head of the linked list
-  private func addToHead(pid: pid_t) {
+  /// Returns true if successfully added, false if PID already exists
+  @discardableResult
+  private func addToHead(pid: pid_t) -> Bool {
+    // Check if PID already exists
+    if pidToNode[pid] != nil {
+      return false
+    }
+
     // Check if we've reached the maximum capacity
     if count >= maxPidsToTrack {
       // Remove the tail node to make space
@@ -71,6 +97,13 @@ class AppOrderManager {
     }
 
     count += 1
+
+    // Verify count stays in sync with pidToNode
+    assert(
+      count == pidToNode.count,
+      "Count mismatch after add: count=\(count), pidToNode.count=\(pidToNode.count)")
+
+    return true
   }
 
   /// Removes a node from the linked list
@@ -91,6 +124,11 @@ class AppOrderManager {
 
     pidToNode.removeValue(forKey: node.pid)
     count -= 1
+
+    // Verify count stays in sync with pidToNode
+    assert(
+      count == pidToNode.count, "Count mismatch: count=\(count), pidToNode.count=\(pidToNode.count)"
+    )
   }
 
   /// Removes the tail node
@@ -162,17 +200,23 @@ class AppOrderManager {
     // This avoids O(n) lookup for each comparison during sorting
     let priorityMap = self.getPriorityIndexMap()
 
-    return windows.sorted { window1, window2 in
+    // Create indexed array to maintain stable sort for items with same priority
+    let indexedWindows = windows.enumerated().map { ($0.offset, $0.element) }
+
+    return indexedWindows.sorted { item1, item2 in
+      let (index1, window1) = item1
+      let (index2, window2) = item2
+
       let pid1 = pidExtractor(window1)
       let pid2 = pidExtractor(window2)
 
-      let index1 = priorityMap[pid1]
-      let index2 = priorityMap[pid2]
+      let priority1 = priorityMap[pid1]
+      let priority2 = priorityMap[pid2]
 
-      switch (index1, index2) {
-      case (.some(let i1), .some(let i2)):
+      switch (priority1, priority2) {
+      case (.some(let p1), .some(let p2)):
         // Both PIDs are in the order list, sort by their order
-        return i1 < i2
+        return p1 < p2
       case (.some, .none):
         // Only first PID is in order list, it comes first
         return true
@@ -180,10 +224,10 @@ class AppOrderManager {
         // Only second PID is in order list, it comes first
         return false
       case (.none, .none):
-        // Neither PID is in order list, maintain original order
-        return false
+        // Neither PID is in order list, maintain original order using index
+        return index1 < index2
       }
-    }
+    }.map { $0.1 }
   }
 
   /// Returns the priority index map of current state
