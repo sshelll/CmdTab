@@ -199,6 +199,14 @@ class CustomTextField: NSTextField {
   }
 
   override func keyDown(with event: NSEvent) {
+    // Check if IME is active (marked text exists)
+    // If so, let the input method handle the event
+    if let fieldEditor = currentEditor() as? NSTextView,
+       fieldEditor.hasMarkedText() {
+      super.keyDown(with: event)
+      return
+    }
+
     // Handle special keys
     if let handler = onSpecialKey, handler(event) {
       return
